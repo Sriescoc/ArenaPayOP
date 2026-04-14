@@ -48,7 +48,7 @@ service cloud.firestore {
 
     function isValidUser(data) {
       return data.keys().hasAll(['uid', 'firstName', 'lastName', 'rut', 'email', 'createdAt']) &&
-             data.keys().hasOnly(['uid', 'firstName', 'lastName', 'rut', 'email', 'createdAt', 'role', 'birthDate', 'supercellTag', 'eaId']) &&
+             data.keys().hasOnly(['uid', 'firstName', 'lastName', 'rut', 'email', 'createdAt', 'role', 'birthDate', 'supercellTag', 'eaId', 'balance', 'withdrawableBalance', 'kycStatus']) &&
              data.uid == request.auth.uid &&
              data.firstName is string && data.firstName.size() >= 2 && data.firstName.size() <= 50 &&
              data.lastName is string && data.lastName.size() >= 2 && data.lastName.size() <= 50 &&
@@ -57,7 +57,10 @@ service cloud.firestore {
              data.createdAt is timestamp &&
              (!('birthDate' in data) || (data.birthDate is string && data.birthDate.size() <= 20)) &&
              (!('supercellTag' in data) || (data.supercellTag is string && data.supercellTag.size() <= 50)) &&
-             (!('eaId' in data) || (data.eaId is string && data.eaId.size() <= 50));
+             (!('eaId' in data) || (data.eaId is string && data.eaId.size() <= 50)) &&
+             (!('balance' in data) || data.balance is number) &&
+             (!('withdrawableBalance' in data) || data.withdrawableBalance is number) &&
+             (!('kycStatus' in data) || data.kycStatus in ['unverified', 'pending', 'verified']);
     }
 
     // ===============================================================

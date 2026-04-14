@@ -121,11 +121,13 @@ export default function Register() {
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/unauthorized-domain') {
-        setError('Error: Debes agregar este dominio (arenapaycl.vercel.app) en Firebase -> Authentication -> Settings -> Authorized Domains.');
+        setError(`Error de configuración: Debes agregar este dominio (${window.location.hostname}) en Firebase -> Authentication -> Settings -> Authorized Domains.`);
       } else if (err.code === 'auth/invalid-credential') {
         setError('Las credenciales de Google no son válidas o han expirado.');
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        setError('La ventana de registro fue cerrada antes de completar el proceso.');
       } else {
-        setError(`Error de Google: ${err.message}`);
+        setError(`Error al registrar con Google. Por favor intenta nuevamente.`);
       }
     } finally {
       setLoading(false);
