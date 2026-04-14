@@ -5,7 +5,8 @@ import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider, handleFirestoreError, OperationType } from '../lib/firebase';
 import { formatRut, validateRut, cn } from '../lib/utils';
-import { Trophy, ArrowRight, Mail, User, CreditCard, AlertCircle, Lock } from 'lucide-react';
+import { ArrowRight, Mail, User, CreditCard, AlertCircle, Lock } from 'lucide-react';
+import { Logo } from '../components/Logo';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Register() {
     email: '',
     password: ''
   });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +36,10 @@ export default function Register() {
         rut: data.rut,
         email: data.email,
         createdAt: serverTimestamp(),
-        role: 'user'
+        role: 'user',
+        balance: 0,
+        withdrawableBalance: 0,
+        kycStatus: 'unverified'
       });
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, `users/${uid}`);
@@ -50,18 +55,21 @@ export default function Register() {
       return;
     }
 
+    if (!acceptedTerms) {
+      setError('Debes aceptar los términos y condiciones para continuar.');
+      return;
+    }
+
     setLoading(true);
     try {
       if (step === 'initial') {
-        // Standard Email/Password Registration
         const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
         await saveUserToFirestore(userCredential.user.uid, formData);
-        navigate('/');
+        navigate('/dashboard');
       } else if (step === 'google-rut') {
-        // Completing Google Registration with RUT
         if (!auth.currentUser) throw new Error("No user found");
         await saveUserToFirestore(auth.currentUser.uid, formData);
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err: any) {
       console.error(err);
@@ -69,8 +77,10 @@ export default function Register() {
         setError('El correo ya está registrado. Por favor inicia sesión.');
       } else if (err.code === 'auth/weak-password') {
         setError('La contraseña debe tener al menos 6 caracteres.');
+      } else if (err.code === 'auth/invalid-credential') {
+        setError('Las credenciales proporcionadas no son válidas.');
       } else {
-        setError('Ocurrió un error al registrar la cuenta. Inténtalo de nuevo.');
+        setError(`Error al registrar: ${err.message}`);
       }
     } finally {
       setLoading(false);
@@ -85,10 +95,8 @@ export default function Register() {
       const userDoc = await getDoc(doc(db, 'users', result.user.uid));
       
       if (userDoc.exists()) {
-        // User already registered and has RUT
-        navigate('/');
+        navigate('/dashboard');
       } else {
-        // New Google user, needs RUT
         const names = result.user.displayName?.split(' ') || ['', ''];
         setFormData(prev => ({
           ...prev,
@@ -100,40 +108,56 @@ export default function Register() {
       }
     } catch (err: any) {
       console.error(err);
-      setError('Error al conectar con Google.');
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Error: Debes agregar este dominio (arenapaycl.vercel.app) en Firebase -> Authentication -> Settings -> Authorized Domains.');
+      } else if (err.code === 'auth/invalid-credential') {
+        setError('Las credenciales de Google no son válidas o han expirado.');
+      } else {
+        setError(`Error de Google: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-20 bg-navy-900">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 md:py-20 relative bg-[#0a0e17] font-sans">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80" 
+          alt="Gaming Background" 
+          className="w-full h-full object-cover opacity-10 mix-blend-luminosity"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/80 via-[#0a0e17]/95 to-[#0a0e17]"></div>
+      </div>
+
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card max-w-xl w-full"
+        className="bg-[#131b26] max-w-xl w-full relative z-10 border border-[#1f2937] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] p-6 md:p-8"
       >
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 bg-electric-blue rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-            <Trophy className="text-white w-7 h-7" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white">
-              {step === 'initial' ? 'Crear Cuenta' : 'Completa tu Perfil'}
+        <div className="flex flex-col items-center mb-8">
+          <Link to="/inicio">
+            <Logo className="mb-6 scale-100 md:scale-110" />
+          </Link>
+          <div className="text-center">
+            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase">
+              {step === 'initial' ? 'CREAR CUENTA' : 'COMPLETA TU PERFIL'}
             </h1>
-            <p className="text-sm text-slate-400">
-              {step === 'initial' ? 'Únete a la plataforma de desafíos #1 de Chile' : 'Necesitamos tu RUT para garantizar la seguridad'}
+            <p className="text-xs md:text-sm text-[#00ff66] font-bold uppercase tracking-wider mt-1">
+              {step === 'initial' ? 'Únete a la élite de ArenaPay' : 'Seguridad y verificación'}
             </p>
           </div>
         </div>
 
         {step === 'initial' && (
-          <div className="mb-6">
+          <div className="mb-8">
             <button 
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full bg-white text-navy-900 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-100 transition-colors disabled:opacity-50"
+              className="w-full bg-white text-black font-black uppercase tracking-wider py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-200 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm md:text-base"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -143,60 +167,60 @@ export default function Register() {
               </svg>
               Continuar con Google
             </button>
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-700"></div></div>
-              <div className="relative flex justify-center text-sm"><span className="px-2 bg-navy-900 text-slate-400">O regístrate con tu correo</span></div>
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#1f2937]"></div></div>
+              <div className="relative flex justify-center text-sm"><span className="px-4 bg-[#131b26] text-slate-500 font-bold uppercase tracking-wider">O regístrate con tu correo</span></div>
             </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid md:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <User className="w-3 h-3" /> Nombre
+                <User className="w-3.5 h-3.5 text-[#00ff66]" /> Nombre
               </label>
               <input 
                 type="text" 
                 required
                 placeholder="Ej: Juan"
-                className="input-field"
+                className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600"
                 value={formData.firstName}
                 onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <User className="w-3 h-3" /> Apellido
+                <User className="w-3.5 h-3.5 text-[#00ff66]" /> Apellido
               </label>
               <input 
                 type="text" 
                 required
                 placeholder="Ej: Pérez"
-                className="input-field"
+                className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600"
                 value={formData.lastName}
                 onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
               />
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <CreditCard className="w-3 h-3" /> RUT Chileno
+              <CreditCard className="w-3.5 h-3.5 text-[#00ff66]" /> RUT Chileno
             </label>
             <input 
               type="text" 
               required
               placeholder="12.345.678-9"
               className={cn(
-                "input-field",
-                formData.rut && !validateRut(formData.rut) && "border-red-500 focus:ring-red-500/50"
+                "w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600",
+                formData.rut && !validateRut(formData.rut) && "border-red-500 focus:border-red-500"
               )}
               value={formData.rut}
               onChange={handleRutChange}
             />
             {formData.rut && !validateRut(formData.rut) && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
+              <p className="text-xs text-red-400 flex items-center gap-1 mt-1">
                 <AlertCircle className="w-3 h-3" /> RUT inválido
               </p>
             )}
@@ -204,30 +228,30 @@ export default function Register() {
 
           {step === 'initial' && (
             <>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <Mail className="w-3 h-3" /> Email
+                  <Mail className="w-3.5 h-3.5 text-[#00ff66]" /> Email
                 </label>
                 <input 
                   type="email" 
                   required
                   placeholder="tu@email.com"
-                  className="input-field"
+                  className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <Lock className="w-3 h-3" /> Contraseña
+                  <Lock className="w-3.5 h-3.5 text-[#00ff66]" /> Contraseña
                 </label>
                 <input 
                   type="password" 
                   required
                   minLength={6}
                   placeholder="Mínimo 6 caracteres"
-                  className="input-field"
+                  className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600"
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                 />
@@ -235,9 +259,30 @@ export default function Register() {
             </>
           )}
 
+          {/* Professional Checkbox */}
+          <div className="pt-2">
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center mt-0.5">
+                <input 
+                  type="checkbox" 
+                  required
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="peer appearance-none w-5 h-5 border-2 border-[#1f2937] rounded bg-[#0a0e17] checked:bg-[#00ff66] checked:border-[#00ff66] transition-colors cursor-pointer shrink-0"
+                />
+                <svg className="absolute w-3.5 h-3.5 text-black opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <span className="text-xs md:text-sm text-slate-400 leading-tight group-hover:text-slate-300 transition-colors">
+                Confirmo que soy mayor de 18 años y acepto los <Link to="/terminos" target="_blank" className="text-[#00ff66] hover:text-[#00cc55] hover:underline transition-colors">Términos de Servicio</Link> y la <Link to="/privacidad" target="_blank" className="text-[#00ff66] hover:text-[#00cc55] hover:underline transition-colors">Política de Privacidad</Link> de ArenaPay.
+              </span>
+            </label>
+          </div>
+
           {error && (
             <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
-              <AlertCircle className="text-red-500 w-5 h-5 shrink-0 mt-0.5" />
+              <AlertCircle className="text-red-400 w-5 h-5 shrink-0 mt-0.5" />
               <p className="text-sm text-red-200">{error}</p>
             </div>
           )}
@@ -245,10 +290,10 @@ export default function Register() {
           <button 
             type="submit" 
             disabled={loading}
-            className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(0,255,102,0.2)] hover:shadow-[0_0_30px_rgba(0,255,102,0.4)] disabled:opacity-50 disabled:cursor-not-allowed mt-4"
           >
             {loading ? (
-              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <div className="w-6 h-6 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
             ) : (
               <>
                 {step === 'initial' ? 'CREAR CUENTA' : 'COMPLETAR REGISTRO'} <ArrowRight className="w-5 h-5" />
@@ -257,8 +302,8 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="mt-8 text-center text-sm text-slate-500">
-          ¿Ya tienes cuenta? <Link to="/login" className="text-electric-blue hover:underline font-medium">Inicia Sesión</Link>
+        <p className="mt-8 text-center text-sm text-slate-500 font-medium">
+          ¿Ya tienes cuenta? <Link to="/login" className="text-[#00ff66] hover:text-[#00cc55] hover:underline font-bold transition-colors">Inicia Sesión aquí</Link>
         </p>
       </motion.div>
     </div>

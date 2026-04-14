@@ -4,7 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../lib/firebase';
-import { Trophy, ArrowRight, Mail, Lock, AlertCircle, Swords } from 'lucide-react';
+import { ArrowRight, Mail, Lock, AlertCircle } from 'lucide-react';
+import { Logo } from '../components/Logo';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -22,10 +23,14 @@ export default function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err: any) {
       console.error(err);
-      setError('Correo o contraseña incorrectos.');
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('Correo o contraseña incorrectos.');
+      } else {
+        setError('Ocurrió un error al iniciar sesión. Por favor, intenta nuevamente.');
+      }
     } finally {
       setLoading(false);
     }
@@ -39,21 +44,27 @@ export default function Login() {
       const userDoc = await getDoc(doc(db, 'users', result.user.uid));
       
       if (userDoc.exists()) {
-        navigate('/');
+        navigate('/dashboard');
       } else {
         await auth.signOut();
         setError('No tienes una cuenta registrada. Por favor, crea una cuenta primero.');
       }
     } catch (err: any) {
       console.error(err);
-      setError(`Error de Google: ${err.message}. Intenta abrir la app en una pestaña nueva.`);
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Error: Debes agregar este dominio (arenapaycl.vercel.app) en Firebase -> Authentication -> Settings -> Authorized Domains.');
+      } else if (err.code === 'auth/invalid-credential') {
+        setError('Las credenciales de Google no son válidas o han expirado.');
+      } else {
+        setError(`Error de Google: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-20 relative bg-navy-900">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 md:py-20 relative bg-[#0a0e17] font-sans">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -61,21 +72,21 @@ export default function Login() {
           alt="Gaming Background" 
           className="w-full h-full object-cover opacity-10 mix-blend-luminosity"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy-900/80 via-navy-900/95 to-navy-900"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/80 via-[#0a0e17]/95 to-[#0a0e17]"></div>
       </div>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card max-w-md w-full relative z-10 border-electric-blue/20 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+        className="bg-[#131b26] max-w-md w-full relative z-10 border border-[#1f2937] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] p-6 md:p-8"
       >
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-electric-blue to-electric-cyan rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-            <Swords className="text-white w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">INICIAR SESIÓN</h1>
-            <p className="text-sm text-electric-blue font-medium uppercase tracking-wider mt-1">Bienvenido de vuelta a la arena</p>
+        <div className="flex flex-col items-center mb-8">
+          <Link to="/inicio">
+            <Logo className="mb-6 scale-100 md:scale-110" />
+          </Link>
+          <div className="text-center">
+            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase">INICIAR SESIÓN</h1>
+            <p className="text-xs md:text-sm text-[#00ff66] font-bold uppercase tracking-wider mt-1">Bienvenido de vuelta a la arena</p>
           </div>
         </div>
 
@@ -83,7 +94,7 @@ export default function Login() {
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full bg-white text-navy-900 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-100 transition-all disabled:opacity-50 mb-8 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+          className="w-full bg-white text-black font-black uppercase tracking-wider py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-200 transition-all disabled:opacity-50 mb-8 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm md:text-base"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -95,20 +106,20 @@ export default function Login() {
         </button>
 
         <div className="relative my-8">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-700/50"></div></div>
-          <div className="relative flex justify-center text-sm"><span className="px-4 bg-navy-900 text-slate-400 font-medium">O ingresa con tu correo</span></div>
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#1f2937]"></div></div>
+          <div className="relative flex justify-center text-sm"><span className="px-4 bg-[#131b26] text-slate-500 font-bold uppercase tracking-wider">O ingresa con tu correo</span></div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5 text-electric-blue" /> Email
+              <Mail className="w-3.5 h-3.5 text-[#00ff66]" /> Email
             </label>
             <input 
               type="email" 
               required
               placeholder="tu@email.com"
-              className="input-field bg-navy-900/50"
+              className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600"
               value={formData.email}
               onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
             />
@@ -116,12 +127,12 @@ export default function Login() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <Lock className="w-3.5 h-3.5 text-electric-blue" /> Contraseña
+              <Lock className="w-3.5 h-3.5 text-[#00ff66]" /> Contraseña
             </label>
             <input 
               type="password" 
               required
-              className="input-field bg-navy-900/50"
+              className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600"
               value={formData.password}
               onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
             />
@@ -137,10 +148,10 @@ export default function Login() {
           <button 
             type="submit" 
             disabled={loading}
-            className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+            className="w-full bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(0,255,102,0.2)] hover:shadow-[0_0_30px_rgba(0,255,102,0.4)] disabled:opacity-50 disabled:cursor-not-allowed mt-4"
           >
             {loading ? (
-              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <div className="w-6 h-6 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
             ) : (
               <>
                 INGRESAR <ArrowRight className="w-5 h-5" />
@@ -149,8 +160,8 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="mt-8 text-center text-sm text-slate-500">
-          ¿No tienes cuenta? <Link to="/register" className="text-electric-blue hover:text-electric-cyan hover:underline font-bold transition-colors">Regístrate aquí</Link>
+        <p className="mt-8 text-center text-sm text-slate-500 font-medium">
+          ¿No tienes cuenta? <Link to="/register" className="text-[#00ff66] hover:text-[#00cc55] hover:underline font-bold transition-colors">Regístrate aquí</Link>
         </p>
       </motion.div>
     </div>
