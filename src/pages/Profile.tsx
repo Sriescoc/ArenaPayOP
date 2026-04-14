@@ -3,12 +3,15 @@ import { motion } from 'motion/react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
-import { CheckCircle2, XCircle, AlertTriangle, Upload, User, Mail, CreditCard } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Upload, User, Mail, CreditCard, Gamepad2, Save } from 'lucide-react';
 
 export default function Profile() {
   const [balance, setBalance] = useState(0);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [supercellTag, setSupercellTag] = useState('');
+  const [eaId, setEaId] = useState('');
+  const [savingGames, setSavingGames] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -19,6 +22,8 @@ export default function Profile() {
           const data = docSnap.data();
           setUserData(data);
           setBalance(data.balance || 0);
+          setSupercellTag(data.supercellTag || '');
+          setEaId(data.eaId || '');
         }
         setLoading(false);
       }
@@ -35,6 +40,22 @@ export default function Profile() {
       alert("Documentos enviados. Tu cuenta está en revisión.");
     } catch (error) {
       console.error("Error updating KYC status", error);
+    }
+  };
+
+  const handleSaveGameIds = async () => {
+    if (!auth.currentUser) return;
+    setSavingGames(true);
+    try {
+      const docRef = doc(db, 'users', auth.currentUser.uid);
+      await updateDoc(docRef, { supercellTag, eaId });
+      setUserData((prev: any) => ({ ...prev, supercellTag, eaId }));
+      alert("IDs de juego guardados correctamente.");
+    } catch (error) {
+      console.error("Error saving game IDs", error);
+      alert("Error al guardar los IDs.");
+    } finally {
+      setSavingGames(false);
     }
   };
 
@@ -125,6 +146,57 @@ export default function Profile() {
                   <Upload className="w-4 h-4" /> Subir Carnet
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Game IDs */}
+        <div className="bg-[#131b26] border border-[#1f2937] rounded-2xl p-6">
+          <h2 className="text-xl font-black text-white uppercase tracking-wider mb-6 flex items-center gap-2">
+            <Gamepad2 className="w-5 h-5 text-[#00ff66]" /> IDs de Juego
+          </h2>
+          <p className="text-sm text-slate-400 mb-6">
+            Añade tus IDs para que se autocompleten al crear una partida.
+          </p>
+
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                Supercell Player Tag (Clash Royale)
+              </label>
+              <input 
+                type="text" 
+                placeholder="Ej: #YQ8G9V0"
+                className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600"
+                value={supercellTag}
+                onChange={(e) => setSupercellTag(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                EA ID (EA FC 24)
+              </label>
+              <input 
+                type="text" 
+                placeholder="Ej: xX_Gamer_Xx"
+                className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600"
+                value={eaId}
+                onChange={(e) => setEaId(e.target.value)}
+              />
+            </div>
+            <div className="pt-2">
+              <button 
+                onClick={handleSaveGameIds}
+                disabled={savingGames}
+                className="bg-[#1f2937] hover:bg-[#374151] text-white font-bold uppercase tracking-wider py-3 px-6 rounded-xl text-sm transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {savingGames ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                Guardar IDs
+              </button>
             </div>
           </div>
         </div>

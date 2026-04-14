@@ -52,11 +52,13 @@ export default function Login() {
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/unauthorized-domain') {
-        setError('Error: Debes agregar este dominio (arenapaycl.vercel.app) en Firebase -> Authentication -> Settings -> Authorized Domains.');
+        setError('Error de configuración: El dominio actual no está autorizado para usar Google Sign-In.');
       } else if (err.code === 'auth/invalid-credential') {
         setError('Las credenciales de Google no son válidas o han expirado.');
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        setError('La ventana de inicio de sesión fue cerrada antes de completar el proceso.');
       } else {
-        setError(`Error de Google: ${err.message}`);
+        setError(`Error al iniciar sesión con Google. Por favor intenta nuevamente.`);
       }
     } finally {
       setLoading(false);

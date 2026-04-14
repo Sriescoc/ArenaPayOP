@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Gamepad2, Wallet, User as UserIcon, LogOut } from 'lucide-react';
 import { Logo } from './Logo';
-import { auth } from '../lib/firebase';
+import { auth, db } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,27 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, balance }: DashboardLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [hasMissingData, setHasMissingData] = useState(false);
+
+  useEffect(() => {
+    const checkUserData = async () => {
+      if (auth.currentUser) {
+        const docRef = doc(db, 'users', auth.currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const isEmailVerified = auth.currentUser.emailVerified;
+          // Check if any required data is missing
+          if (!data.firstName || !data.lastName || !data.rut || !data.birthDate || !isEmailVerified) {
+            setHasMissingData(true);
+          } else {
+            setHasMissingData(false);
+          }
+        }
+      }
+    };
+    checkUserData();
+  }, []);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -22,7 +44,7 @@ export function DashboardLayout({ children, balance }: DashboardLayoutProps) {
   const navItems = [
     { path: '/dashboard', icon: Gamepad2, label: 'Jugar' },
     { path: '/wallet', icon: Wallet, label: 'Billetera' },
-    { path: '/profile', icon: UserIcon, label: 'Perfil' },
+    { path: '/profile', icon: UserIcon, label: 'Perfil', showDot: hasMissingData },
   ];
 
   return (
@@ -44,7 +66,7 @@ export function DashboardLayout({ children, balance }: DashboardLayoutProps) {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2 ${
+                    className={`relative px-4 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2 ${
                       isActive 
                         ? 'bg-[#1f2937] text-white' 
                         : 'text-slate-400 hover:text-white hover:bg-[#1a242d]'
@@ -52,6 +74,9 @@ export function DashboardLayout({ children, balance }: DashboardLayoutProps) {
                   >
                     <Icon className="w-4 h-4" />
                     {item.label}
+                    {item.showDot && (
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    )}
                   </Link>
                 );
               })}
@@ -100,11 +125,16 @@ export function DashboardLayout({ children, balance }: DashboardLayoutProps) {
               <Link 
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
+                className={`relative flex flex-col items-center justify-center w-full h-full space-y-1 ${
                   isActive ? 'text-[#00ff66]' : 'text-slate-500 hover:text-slate-300'
                 }`}
               >
-                <Icon className={`w-6 h-6 ${isActive ? 'stroke-[2.5px]' : ''}`} />
+                <div className="relative">
+                  <Icon className={`w-6 h-6 ${isActive ? 'stroke-[2.5px]' : ''}`} />
+                  {item.showDot && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse border-2 border-[#131b26]"></span>
+                  )}
+                </div>
                 <span className="text-[10px] font-bold uppercase tracking-wider">{item.label}</span>
               </Link>
             );

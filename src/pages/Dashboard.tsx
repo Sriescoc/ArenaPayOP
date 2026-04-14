@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
-import { Swords, Users, Trophy, ChevronRight, X, AlertCircle } from 'lucide-react';
+import { Swords, Users, Trophy, ChevronRight, X, AlertCircle, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const GAMES = [
   {
@@ -14,7 +15,9 @@ const GAMES = [
       { id: '1v1', name: '1 VS 1', icon: Swords },
       { id: '2v2', name: '2 VS 2', icon: Users }
     ],
-    color: 'from-blue-600 to-purple-600'
+    color: 'from-blue-600 to-purple-600',
+    requiredId: 'supercellTag',
+    idLabel: 'Supercell Player Tag'
   },
   {
     id: 'fifa',
@@ -23,12 +26,16 @@ const GAMES = [
     modes: [
       { id: '1v1', name: '1 VS 1', icon: Swords }
     ],
-    color: 'from-green-600 to-emerald-600'
+    color: 'from-green-600 to-emerald-600',
+    requiredId: 'eaId',
+    idLabel: 'EA ID'
   }
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [balance, setBalance] = useState(0);
+  const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
   // Betting Flow State
@@ -43,7 +50,9 @@ export default function Dashboard() {
         const docRef = doc(db, 'users', auth.currentUser.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setBalance(docSnap.data().balance || 0);
+          const data = docSnap.data();
+          setUserData(data);
+          setBalance(data.balance || 0);
         }
         setLoading(false);
       }
@@ -65,6 +74,13 @@ export default function Dashboard() {
     setError(null);
   };
 
+  const calculateWinnings = (amount: number) => {
+    if (!amount) return 0;
+    const totalPool = amount * 2;
+    const rake = totalPool * 0.10; // 10% rake
+    return totalPool - rake;
+  };
+
   const handleSearchOpponent = () => {
     setError(null);
     if (!selectedMode) {
@@ -77,6 +93,12 @@ export default function Dashboard() {
     }
     if (betAmount > balance) {
       setError('Saldo insuficiente para esta apuesta.');
+      return;
+    }
+    
+    // Check if user has the required game ID
+    if (selectedGame.requiredId && (!userData || !userData[selectedGame.requiredId])) {
+      setError(`Debes configurar tu ${selectedGame.idLabel} en tu Perfil antes de jugar.`);
       return;
     }
     
@@ -236,10 +258,44 @@ export default function Dashboard() {
                   <p className="text-xs text-slate-500 mt-3 font-medium">Mínimo: $1.000 | Máximo: $100.000</p>
                 </div>
 
+                {/* Potential Winnings */}
+                {betAmount && betAmount >= 1000 && betAmount <= 100000 && (
+                  <div className="mb-6 bg-[#0a0e17] border border-[#1f2937] rounded-xl p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-slate-400 font-bold">Pozo Total:</span>
+                      <span className="text-sm text-white font-bold">${(betAmount * 2).toLocaleString('es-CL')}</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm text-slate-400 font-bold flex items-center gap-1 group relative">
+                        Comisión (10%)
+                        <Info className="w-3.5 h-3.5 text-slate-500 cursor-help" />
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#1f2937] text-xs text-slate-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 text-center pointer-events-none">
+                          ArenaPay cobra un 10% del pozo total para mantener la plataforma.
+                        </div>
+                      </span>
+                      <span className="text-sm text-red-400 font-bold">-${((betAmount * 2) * 0.10).toLocaleString('es-CL')}</span>
+                    </div>
+                    <div className="pt-3 border-t border-[#1f2937] flex justify-between items-center">
+                      <span className="text-base text-[#00ff66] font-black uppercase tracking-wider">Ganancia Potencial:</span>
+                      <span className="text-xl text-[#00ff66] font-black">${calculateWinnings(betAmount).toLocaleString('es-CL')}</span>
+                    </div>
+                  </div>
+                )}
+
                 {error && (
                   <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-2">
                     <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                    <p className="text-sm text-red-300">{error}</p>
+                    <div className="flex-1">
+                      <p className="text-sm text-red-300">{error}</p>
+                      {error.includes('Perfil') && (
+                        <button 
+                          onClick={() => navigate('/profile')}
+                          className="mt-2 text-xs font-bold text-white bg-red-500/20 hover:bg-red-500/30 px-3 py-1.5 rounded transition-colors"
+                        >
+                          Ir al Perfil
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
 

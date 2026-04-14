@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithPopup, sendEmailVerification } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider, handleFirestoreError, OperationType } from '../lib/firebase';
 import { formatRut, validateRut, cn } from '../lib/utils';
-import { ArrowRight, Mail, User, CreditCard, AlertCircle, Lock } from 'lucide-react';
+import { ArrowRight, Mail, User, CreditCard, AlertCircle, Lock, Calendar } from 'lucide-react';
 import { Logo } from '../components/Logo';
 
 export default function Register() {
@@ -15,6 +15,7 @@ export default function Register() {
     firstName: '',
     lastName: '',
     rut: '',
+    birthDate: '',
     email: '',
     password: ''
   });
@@ -34,6 +35,7 @@ export default function Register() {
         firstName: data.firstName,
         lastName: data.lastName,
         rut: data.rut,
+        birthDate: data.birthDate,
         email: data.email,
         createdAt: serverTimestamp(),
         role: 'user',
@@ -55,6 +57,11 @@ export default function Register() {
       return;
     }
 
+    if (!formData.birthDate) {
+      setError('Debes ingresar tu fecha de nacimiento.');
+      return;
+    }
+
     if (!acceptedTerms) {
       setError('Debes aceptar los términos y condiciones para continuar.');
       return;
@@ -65,10 +72,15 @@ export default function Register() {
       if (step === 'initial') {
         const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
         await saveUserToFirestore(userCredential.user.uid, formData);
+        await sendEmailVerification(userCredential.user);
         navigate('/dashboard');
       } else if (step === 'google-rut') {
         if (!auth.currentUser) throw new Error("No user found");
         await saveUserToFirestore(auth.currentUser.uid, formData);
+        // Google accounts are usually verified, but we can send it anyway if not
+        if (!auth.currentUser.emailVerified) {
+          await sendEmailVerification(auth.currentUser);
+        }
         navigate('/dashboard');
       }
     } catch (err: any) {
@@ -204,26 +216,42 @@ export default function Register() {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <CreditCard className="w-3.5 h-3.5 text-[#00ff66]" /> RUT Chileno
-            </label>
-            <input 
-              type="text" 
-              required
-              placeholder="12.345.678-9"
-              className={cn(
-                "w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600",
-                formData.rut && !validateRut(formData.rut) && "border-red-500 focus:border-red-500"
+          <div className="grid md:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <CreditCard className="w-3.5 h-3.5 text-[#00ff66]" /> RUT Chileno
+              </label>
+              <input 
+                type="text" 
+                required
+                placeholder="12.345.678-9"
+                className={cn(
+                  "w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600",
+                  formData.rut && !validateRut(formData.rut) && "border-red-500 focus:border-red-500"
+                )}
+                value={formData.rut}
+                onChange={handleRutChange}
+              />
+              {formData.rut && !validateRut(formData.rut) && (
+                <p className="text-xs text-red-400 flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-3 h-3" /> RUT inválido
+                </p>
               )}
-              value={formData.rut}
-              onChange={handleRutChange}
-            />
-            {formData.rut && !validateRut(formData.rut) && (
-              <p className="text-xs text-red-400 flex items-center gap-1 mt-1">
-                <AlertCircle className="w-3 h-3" /> RUT inválido
-              </p>
-            )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <Calendar className="w-3.5 h-3.5 text-[#00ff66]" /> Fecha de Nacimiento
+              </label>
+              <input 
+                type="date" 
+                required
+                max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600 [color-scheme:dark]"
+                value={formData.birthDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
+              />
+            </div>
           </div>
 
           {step === 'initial' && (
