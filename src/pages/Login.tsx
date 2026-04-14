@@ -52,7 +52,7 @@ export default function Login() {
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/unauthorized-domain') {
-        setError('Error de configuración: El dominio actual no está autorizado para usar Google Sign-In.');
+        setError(`Error de configuración: Debes agregar este dominio (${window.location.hostname}) en Firebase -> Authentication -> Settings -> Authorized Domains.`);
       } else if (err.code === 'auth/invalid-credential') {
         setError('Las credenciales de Google no son válidas o han expirado.');
       } else if (err.code === 'auth/popup-closed-by-user') {
