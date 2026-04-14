@@ -1,21 +1,13 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBPTX1wlibOd0KSGSoB6QFlZE_LhLuCXE0",
-  authDomain: "arenapay-6a898.firebaseapp.com",
-  projectId: "arenapay-6a898",
-  storageBucket: "arenapay-6a898.firebasestorage.app",
-  messagingSenderId: "788075409653",
-  appId: "1:788075409653:web:ad54365f09e021cea715bc",
-  measurementId: "G-VQ53FP6EFS"
+{
+  apiKey: "AIzaSyCkxlKgSsaDkrRA5yx9XB2Q1OTbKNV1-k0",
+  authDomain: "arenapay-7f1cf.firebaseapp.com",
+  projectId: "arenapay-7f1cf",
+  storageBucket: "arenapay-7f1cf.firebasestorage.app",
+  messagingSenderId: "111937211400",
+  appId: "1:111937211400:web:9f6667d95009ba9d0295bd",
+  measurementId: "G-L8XHZ97G3K"
 };
-
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
