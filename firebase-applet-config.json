@@ -1,10 +1,21 @@
-{
-  "projectId": "keen-ascent-415702",
-  "appId": "1:526181540609:web:75d627f2f3bc8e30a7b100",
-  "apiKey": "AIzaSyBUaBa2A2nkVEkZYKVu_ps4OWmJJsBCFhY",
-  "authDomain": "keen-ascent-415702.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-a4d4942e-98cd-4052-b6e4-106392c3a748",
-  "storageBucket": "keen-ascent-415702.firebasestorage.app",
-  "messagingSenderId": "526181540609",
-  "measurementId": ""
-}
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBPTX1wlibOd0KSGSoB6QFlZE_LhLuCXE0",
+  authDomain: "arenapay-6a898.firebaseapp.com",
+  projectId: "arenapay-6a898",
+  storageBucket: "arenapay-6a898.firebasestorage.app",
+  messagingSenderId: "788075409653",
+  appId: "1:788075409653:web:ad54365f09e021cea715bc",
+  measurementId: "G-VQ53FP6EFS"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
