@@ -10,7 +10,7 @@ const GAMES = [
   {
     id: 'cr',
     name: 'Clash Royale',
-    image: 'https://wallpapercave.com/wp/wp1917128.jpg',
+    image: 'https://cdn.hobbyconsolas.com/sites/navi.axelspringer.es/public/media/image/2016/03/576628-clash-royale-consejos-trucos-ganar.jpg',
     modes: [
       { id: '1v1', name: '1 VS 1', icon: Swords },
       { id: '2v2', name: '2 VS 2', icon: Users }
@@ -18,6 +18,18 @@ const GAMES = [
     color: 'from-blue-600 to-purple-600',
     requiredId: 'supercellTag',
     idLabel: 'Supercell Player Tag'
+  },
+  {
+    id: 'nba',
+    name: 'NBA',
+    image: 'https://cdn.cloudflare.steamstatic.com/steam/apps/2338770/header.jpg',
+    modes: [
+      { id: '2k24-ps5', name: '2K24 (PS5)', icon: Swords },
+      { id: '2k24-ps4', name: '2K24 (PS4)', icon: Swords }
+    ],
+    color: 'from-orange-600 to-red-600',
+    requiredId: 'nbaId',
+    idLabel: 'PSN ID / Xbox Gamertag'
   },
   {
     id: 'fifa',

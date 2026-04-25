@@ -135,21 +135,21 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 md:py-20 relative bg-[#0a0e17] font-sans">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 md:py-20 relative bg-[#0a0e17] font-sans overflow-y-auto">
       {/* Background Image */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 fixed">
         <img 
           src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80" 
           alt="Gaming Background" 
-          className="w-full h-full object-cover opacity-10 mix-blend-luminosity"
+          className="w-full h-full object-cover opacity-30 mix-blend-screen"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/80 via-[#0a0e17]/95 to-[#0a0e17]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/60 via-[#0a0e17]/80 to-[#0a0e17]"></div>
       </div>
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-[#131b26] max-w-xl w-full relative z-10 border border-[#1f2937] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] p-6 md:p-8"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-[#131b26]/90 backdrop-blur-xl max-w-xl w-full relative z-10 border border-[#1f2937] hover:border-[#00ff66]/30 transition-colors rounded-3xl shadow-[0_0_50px_rgba(0,255,102,0.1)] p-6 md:p-8 my-auto"
       >
         <div className="flex flex-col items-center mb-8">
           <Link to="/inicio">

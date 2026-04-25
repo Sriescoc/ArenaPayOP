@@ -109,7 +109,7 @@ export default function Home({ user }: HomeProps) {
               transition={{ delay: 0.4 }}
               className="text-lg md:text-xl text-slate-400 max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed font-medium"
             >
-              Compite en Clash Royale y EA FC 24. Apuesta por ti mismo, vence a tus rivales y retira tus ganancias al instante.
+              Compite en Clash Royale y NBA. Apuesta por ti mismo, vence a tus rivales y retira tus ganancias al instante.
             </motion.p>
             
             <motion.div 
@@ -251,37 +251,43 @@ export default function Home({ user }: HomeProps) {
             <p className="text-slate-400 max-w-2xl mx-auto font-medium text-xl">Seleccionamos los juegos más competitivos para que demuestres tu nivel.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-10">
+          <div className="grid md:grid-cols-3 gap-10">
             {/* Clash Royale */}
             <motion.div 
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              whileHover={{ y: -10 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="group relative rounded-3xl overflow-hidden border-2 border-[#1f2937] hover:border-[#00ff66] transition-all duration-500 shadow-2xl"
+              className="group relative rounded-3xl overflow-hidden border-2 border-[#1f2937] hover:border-[#00ff66] transition-all duration-500 shadow-2xl cursor-pointer"
+              onClick={handlePlayClick}
             >
               <div className="aspect-[4/3] relative">
                 <img 
-                  src="https://wallpapercave.com/wp/wp1917128.jpg" 
+                  src="https://techcrunch.com/wp-content/uploads/2016/03/clash-royale-header.png" 
                   alt="Clash Royale" 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/60 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-8 w-full">
-                  <h3 className="text-5xl font-black text-white uppercase tracking-wider drop-shadow-lg mb-4">Clash Royale</h3>
-                  <div className="flex gap-3">
-                    <span className="bg-[#00ff66] text-black text-sm font-black px-4 py-2 rounded-lg uppercase tracking-wider shadow-[0_0_15px_rgba(0,255,102,0.5)]">1 VS 1</span>
-                    <span className="bg-[#131b26]/80 backdrop-blur-sm border border-white/20 text-white text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider">2 VS 2</span>
+                <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-500 group-hover:-translate-y-4">
+                  <h3 className="text-4xl font-black text-white uppercase tracking-wider drop-shadow-lg mb-4 glow-text">Clash Royale</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-[#00ff66] text-black text-xs font-black px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-[0_0_15px_rgba(0,255,102,0.5)]">1 VS 1</span>
+                    <span className="bg-[#131b26]/80 backdrop-blur-sm border border-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">2 VS 2</span>
                   </div>
                 </div>
+                <div className="absolute inset-0 border-4 border-[#00ff66] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             </motion.div>
 
-            {/* FIFA */}
+            {/* EA FC 24 */}
             <motion.div 
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              whileHover={{ y: -10 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="group relative rounded-3xl overflow-hidden border-2 border-[#1f2937] hover:border-[#00ff66] transition-all duration-500 shadow-2xl"
+              transition={{ delay: 0.1 }}
+              className="group relative rounded-3xl overflow-hidden border-2 border-[#1f2937] hover:border-[#00ff66] transition-all duration-500 shadow-2xl cursor-pointer"
+              onClick={handlePlayClick}
             >
               <div className="aspect-[4/3] relative">
                 <img 
@@ -290,12 +296,41 @@ export default function Home({ user }: HomeProps) {
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/60 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-8 w-full">
-                  <h3 className="text-5xl font-black text-white uppercase tracking-wider drop-shadow-lg mb-4">EA FC 24</h3>
-                  <div className="flex gap-3">
-                    <span className="bg-[#00ff66] text-black text-sm font-black px-4 py-2 rounded-lg uppercase tracking-wider shadow-[0_0_15px_rgba(0,255,102,0.5)]">1 VS 1</span>
+                <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-500 group-hover:-translate-y-4">
+                  <h3 className="text-4xl font-black text-white uppercase tracking-wider drop-shadow-lg mb-4 glow-text">EA FC 24</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-[#00ff66] text-black text-xs font-black px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-[0_0_15px_rgba(0,255,102,0.5)]">1 VS 1</span>
                   </div>
                 </div>
+                <div className="absolute inset-0 border-4 border-[#00ff66] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              </div>
+            </motion.div>
+
+            {/* NBA */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              whileHover={{ y: -10 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ delay: 0.2 }}
+              className="group relative rounded-3xl overflow-hidden border-2 border-[#1f2937] hover:border-[#ff6b00] transition-all duration-500 shadow-2xl cursor-pointer"
+              onClick={handlePlayClick}
+            >
+              <div className="aspect-[4/3] relative">
+                <img 
+                  src="https://cdn.cloudflare.steamstatic.com/steam/apps/2338770/header.jpg" 
+                  alt="NBA" 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/60 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-500 group-hover:-translate-y-4">
+                  <h3 className="text-4xl font-black text-white uppercase tracking-wider drop-shadow-lg mb-4 text-[#ff8800] group-hover:text-white transition-colors">NBA</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-[#ff6b00] text-black text-xs font-black px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-[0_0_15px_rgba(255,107,0,0.5)]">2K24 (PS5)</span>
+                    <span className="bg-[#131b26]/80 backdrop-blur-sm border border-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">2K24 (PS4)</span>
+                  </div>
+                </div>
+                <div className="absolute inset-0 border-4 border-[#ff6b00] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             </motion.div>
           </div>

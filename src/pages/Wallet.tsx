@@ -1,27 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '../components/DashboardLayout';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { Wallet as WalletIcon, ArrowDownToLine, ArrowUpFromLine, AlertCircle, CheckCircle2, Clock, Swords, Trophy } from 'lucide-react';
 import { motion } from 'motion/react';
-
-// Mock transactions for now since we don't have a real transactions collection yet
-const MOCK_TRANSACTIONS = [
-  { id: '1', type: 'deposit', amount: 10000, date: '2026-04-14T10:00:00Z', status: 'completed', description: 'Depósito Webpay' },
-  { id: '2', type: 'bet', amount: -5000, date: '2026-04-14T11:30:00Z', status: 'completed', description: 'Partida Clash Royale (1v1)' },
-  { id: '3', type: 'win', amount: 9000, date: '2026-04-14T11:45:00Z', status: 'completed', description: 'Victoria Clash Royale' },
-  { id: '4', type: 'withdrawal', amount: -14000, date: '2026-04-13T15:20:00Z', status: 'pending', description: 'Retiro a Cuenta RUT' },
-];
 
 export default function Wallet() {
   const [balance, setBalance] = useState(0);
   const [withdrawableBalance, setWithdrawableBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [kycStatus, setKycStatus] = useState('unverified');
+  const [transactions, setTransactions] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchData = async () => {
       if (auth.currentUser) {
+        // Fetch User Data
         const docRef = doc(db, 'users', auth.currentUser.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
@@ -30,10 +24,28 @@ export default function Wallet() {
           setWithdrawableBalance(data.withdrawableBalance || 0);
           setKycStatus(data.kycStatus || 'unverified');
         }
+
+        // Fetch Transactions
+        try {
+          const txQuery = query(
+            collection(db, 'transactions'),
+            where('userId', '==', auth.currentUser.uid),
+            // Note: orderBy requires a composite index if used with where on a different field, 
+            // but we might not have it. For now let's just fetch and sort locally if needed, 
+            // but usually we can do this if we create the index. We will sort locally to avoid index errors.
+          );
+          const txSnap = await getDocs(txQuery);
+          let txs = txSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+          txs.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+          setTransactions(txs);
+        } catch (error) {
+          console.error("Error fetching transactions", error);
+        }
+        
         setLoading(false);
       }
     };
-    fetchUserData();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -160,9 +172,9 @@ export default function Wallet() {
           </h2>
           
           <div className="bg-[#131b26] border border-[#1f2937] rounded-2xl overflow-hidden">
-            {MOCK_TRANSACTIONS.length > 0 ? (
+            {transactions.length > 0 ? (
               <div className="divide-y divide-[#1f2937]">
-                {MOCK_TRANSACTIONS.map((tx) => (
+                {transactions.map((tx) => (
                   <div key={tx.id} className="p-4 sm:p-6 flex items-center justify-between hover:bg-[#1a242d] transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-[#0a0e17] border border-[#1f2937] flex items-center justify-center shrink-0">
@@ -172,7 +184,9 @@ export default function Wallet() {
                         <p className="text-white font-bold text-sm sm:text-base">{tx.description}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs text-slate-500">
-                            {new Date(tx.date).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                            {tx.createdAt 
+                              ? new Date(tx.createdAt.toDate ? tx.createdAt.toDate() : tx.createdAt).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                              : 'Reciente'}
                           </span>
                           <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                             tx.status === 'completed' ? 'bg-[#00ff66]/10 text-[#00ff66]' : 'bg-yellow-500/10 text-yellow-500'
@@ -196,7 +210,7 @@ export default function Wallet() {
                 <div className="w-16 h-16 bg-[#0a0e17] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1f2937]">
                   <Clock className="w-8 h-8 text-slate-600" />
                 </div>
-                <p className="text-slate-400 font-medium">Aún no tienes transacciones.</p>
+                <p className="text-slate-400 font-medium">Aún no ha habido ninguna transacción.</p>
               </div>
             )}
           </div>

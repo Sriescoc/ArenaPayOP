@@ -98,14 +98,6 @@ export function DashboardLayout({ children, balance }: DashboardLayoutProps) {
             <Link to="/wallet" className="hidden md:flex bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider py-2 px-4 rounded-lg text-sm transition-colors shadow-[0_0_15px_rgba(0,255,102,0.2)]">
               DEPOSITAR
             </Link>
-
-            <button 
-              onClick={handleLogout}
-              className="hidden md:flex p-2 hover:bg-red-500/10 rounded-xl transition-colors text-slate-400 hover:text-red-400 ml-2"
-              title="Cerrar Sesión"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
           </div>
         </div>
       </nav>
@@ -139,15 +131,6 @@ export function DashboardLayout({ children, balance }: DashboardLayoutProps) {
               </Link>
             );
           })}
-          
-          {/* Mobile Logout */}
-          <button
-            onClick={handleLogout}
-            className="flex flex-col items-center justify-center w-full h-full space-y-1 text-slate-500 hover:text-red-400"
-          >
-            <LogOut className="w-6 h-6" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Salir</span>
-          </button>
         </div>
       </nav>
     </div>
