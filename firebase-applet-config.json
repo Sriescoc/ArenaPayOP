@@ -1,13 +1,9 @@
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 {
-  apiKey: "AIzaSyCkxlKgSsaDkrRA5yx9XB2Q1OTbKNV1-k0",
-  authDomain: "arenapay-7f1cf.firebaseapp.com",
-  projectId: "arenapay-7f1cf",
-  storageBucket: "arenapay-7f1cf.firebasestorage.app",
-  messagingSenderId: "111937211400",
-  appId: "1:111937211400:web:9f6667d95009ba9d0295bd",
-  measurementId: "G-L8XHZ97G3K"
-};
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+  "apiKey": "AIzaSyCkxlKgSsaDkrRA5yx9XB2Q1OTbKNV1-k0",
+  "authDomain": "arenapay-7f1cf.firebaseapp.com",
+  "projectId": "arenapay-7f1cf",
+  "storageBucket": "arenapay-7f1cf.firebasestorage.app",
+  "messagingSenderId": "111937211400",
+  "appId": "1:111937211400:web:9f6667d95009ba9d0295bd",
+  "measurementId": "G-L8XHZ97G3K"
+}
