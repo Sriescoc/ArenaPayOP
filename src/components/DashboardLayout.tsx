@@ -42,7 +42,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar — Desktop */}
       <aside className="hidden md:flex flex-col w-64 bg-[#16213e] border-r border-[#0f3460]/50 fixed inset-y-0 left-0 z-40">
         <div className="p-5 border-b border-[#0f3460]/50">
-          <Link to="/dashboard"><Logo className="scale-90 origin-left" /></Link>
+          <Link to="/inicio"><Logo className="scale-90 origin-left" /></Link>
         </div>
 
         {/* Balance Card */}
@@ -87,7 +87,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <nav className="md:hidden fixed top-0 w-full z-50 bg-[#16213e] border-b border-[#0f3460]/50 h-16">
           <div className="px-4 h-full flex items-center justify-between">
             <button onClick={() => setSidebarOpen(true)} className="text-white"><Menu className="w-6 h-6" /></button>
-            <Logo className="scale-75" />
+            <Link to="/inicio"><Logo className="scale-75" /></Link>
             <div className="flex items-center gap-2">
               <span className="text-sm font-black text-[#00ff66]">${balance.toLocaleString('es-CL')}</span>
             </div>
@@ -100,7 +100,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="absolute inset-0 bg-black/70" onClick={() => setSidebarOpen(false)}></div>
             <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#16213e] border-r border-[#0f3460]/50 flex flex-col">
               <div className="p-4 flex items-center justify-between border-b border-[#0f3460]/50">
-                <Logo className="scale-75 origin-left" />
+                <Link to="/inicio" onClick={() => setSidebarOpen(false)}><Logo className="scale-75 origin-left" /></Link>
                 <button onClick={() => setSidebarOpen(false)} className="text-white"><X className="w-6 h-6" /></button>
               </div>
               <div className="mx-4 mt-4 bg-gradient-to-br from-[#00ff66]/10 to-[#0f3460]/30 border border-[#00ff66]/20 rounded-xl p-4">
