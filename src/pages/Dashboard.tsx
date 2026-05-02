@@ -5,10 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
 import { Swords, X, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import type { GameDefinition, MatchRequest } from '../lib/firestore-types';
 import { GAME_DEFINITIONS } from '../lib/firestore-types';
-import { MatchFeed } from '../components/matchmaking/MatchFeed';
-import { CreateMatchModal } from '../components/matchmaking/CreateMatchModal';
-import { MakeOfferModal } from '../components/matchmaking/MakeOfferModal';
+import { GameLobbyModal } from '../components/matchmaking/GameLobbyModal';
 import { MyRequestsPanel } from '../components/matchmaking/MyRequestsPanel';
 
 export default function Dashboard() {
@@ -17,15 +16,10 @@ export default function Dashboard() {
   const { info } = useToast();
   const balance = userData?.balance || 0;
 
-  const [selectedGameToCreate, setSelectedGameToCreate] = useState<GameDefinition | null>(null);
-  const [selectedRequestToOffer, setSelectedRequestToOffer] = useState<MatchRequest | null>(null);
+  const [selectedGameToLobby, setSelectedGameToLobby] = useState<GameDefinition | null>(null);
 
   const handleGameSelect = (game: GameDefinition) => { 
-    setSelectedGameToCreate(game);
-  };
-  
-  const handleChallengeRequest = (request: MatchRequest) => {
-    setSelectedRequestToOffer(request);
+    setSelectedGameToLobby(game);
   };
 
   return (
@@ -38,7 +32,7 @@ export default function Dashboard() {
         </div>
         <div className="absolute bottom-0 left-0 p-6 md:p-10 max-w-2xl">
           <div className="flex items-center gap-3 mb-4">
-            <span className="bg-emerald-500 text-slate-950 px-3 py-1 rounded-full text-xs font-bold animate-pulse">EN VIVO</span>
+            <span className="bg-emerald-500 text-slate-950 px-3 py-1 rounded-full text-xs font-bold shadow-lg shadow-emerald-500/20">PRÓXIMAMENTE</span>
             <span className="text-white/60 font-label-md text-label-md tracking-widest">TORNEO MAJOR 2024</span>
           </div>
           <h1 className="font-headline-xl text-3xl md:text-5xl text-white mb-4 italic uppercase leading-none font-black">TORNEO MAJOR FORTNITE</h1>
@@ -81,25 +75,14 @@ export default function Dashboard() {
 
       {/* Matchmaking Feed Shell */}
       <section>
-        <div className="flex items-center gap-4 mb-6">
-          <span className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></span>
-          <h2 className="font-headline-lg text-2xl md:text-3xl text-white italic tracking-tighter font-black uppercase">TABLERO DE SOLICITUDES</h2>
-        </div>
         <MyRequestsPanel />
-        <MatchFeed onChallenge={handleChallengeRequest} />
       </section>
 
       <AnimatePresence>
-        {selectedGameToCreate && (
-          <CreateMatchModal 
-            game={selectedGameToCreate} 
-            onClose={() => setSelectedGameToCreate(null)} 
-          />
-        )}
-        {selectedRequestToOffer && (
-          <MakeOfferModal 
-            request={selectedRequestToOffer} 
-            onClose={() => setSelectedRequestToOffer(null)} 
+        {selectedGameToLobby && (
+          <GameLobbyModal 
+            game={selectedGameToLobby} 
+            onClose={() => setSelectedGameToLobby(null)} 
           />
         )}
       </AnimatePresence>

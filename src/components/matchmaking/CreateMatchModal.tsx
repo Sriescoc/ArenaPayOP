@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, AlertCircle, Swords } from 'lucide-react';
+import { X, AlertCircle, Swords, Info } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
@@ -9,18 +9,20 @@ import type { GameDefinition } from '../../lib/firestore-types';
 
 interface CreateMatchModalProps {
   game: GameDefinition;
+  forcedMode?: string;
   onClose: () => void;
 }
 
-export function CreateMatchModal({ game, onClose }: CreateMatchModalProps) {
+export function CreateMatchModal({ game, forcedMode, onClose }: CreateMatchModalProps) {
   const { userData, user } = useAuth();
   const { success, error: showError } = useToast();
   
-  const [selectedMode, setSelectedMode] = useState<string | null>(null);
+  const [selectedMode, setSelectedMode] = useState<string | null>(forcedMode || null);
   const [targetAmount, setTargetAmount] = useState<number | ''>('');
   const [tolerance, setTolerance] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showFlexInfo, setShowFlexInfo] = useState(false);
 
   const balance = userData?.balance || 0;
 
@@ -101,21 +103,35 @@ export function CreateMatchModal({ game, onClose }: CreateMatchModalProps) {
               <input type="number" min="1000" step="1000" value={targetAmount} onChange={e => setTargetAmount(e.target.value ? Number(e.target.value) : '')} placeholder="5000" className="w-full bg-surface-container-low border border-white/10 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white font-black text-xl rounded-xl py-4 pl-8 pr-4 outline-none transition-all" />
             </div>
             
-            {/* Tolerance */}
-            <div className="bg-surface-container-low border border-white/10 p-4 rounded-xl">
-               <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Tolerancia de Ofertas (Flexibilidad)</label>
-               <input type="range" min="0" max="50" step="5" value={tolerance} onChange={e => setTolerance(Number(e.target.value))} className="w-full accent-emerald-500 mb-2" />
-               <div className="flex justify-between text-xs text-slate-400 font-bold">
-                 <span>Exacto (0%)</span>
-                 <span>±{tolerance}%</span>
-                 <span>Flexible (50%)</span>
+          {/* Tolerance */}
+          <div className="bg-surface-container-low border border-white/10 p-4 rounded-xl relative">
+             <div className="flex justify-between items-center mb-3">
+               <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Tolerancia de Ofertas (Flexibilidad)</label>
+               <button onClick={() => setShowFlexInfo(!showFlexInfo)} className="text-emerald-400 hover:text-emerald-300 transition-colors">
+                 <Info className="w-4 h-4" />
+               </button>
+             </div>
+             
+             {showFlexInfo && (
+               <div className="mb-4 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-lg text-xs text-slate-300">
+                 <p className="font-bold text-emerald-400 mb-1">¿Qué es la flexibilidad?</p>
+                 <p>Al crear una solicitud, otros jugadores te enviarán "ofertas" para jugar. La flexibilidad define cuánto dinero extra o de menos estás dispuesto a aceptar.</p>
+                 <p className="mt-2 text-white font-bold italic">Ejemplo: Si buscas por $5.000 con 20% de flexibilidad, permitirás que otros te oferten desde $4.000 hasta $6.000.</p>
                </div>
-               {targetAmount && targetAmount > 0 && (
-                 <p className="text-center text-xs mt-3 text-emerald-400/80">
-                   Aceptarás retos entre <span className="font-bold text-emerald-400">${(targetAmount - (targetAmount * tolerance / 100)).toLocaleString('es-CL')}</span> y <span className="font-bold text-emerald-400">${(targetAmount + (targetAmount * tolerance / 100)).toLocaleString('es-CL')}</span>
-                 </p>
-               )}
-            </div>
+             )}
+
+             <input type="range" min="0" max="50" step="5" value={tolerance} onChange={e => setTolerance(Number(e.target.value))} className="w-full accent-emerald-500 mb-2" />
+             <div className="flex justify-between text-xs text-slate-400 font-bold">
+               <span>Exacto (0%)</span>
+               <span>±{tolerance}%</span>
+               <span>Flexible (50%)</span>
+             </div>
+             {targetAmount && targetAmount > 0 && (
+               <p className="text-center text-xs mt-3 text-emerald-400/80">
+                 Aceptarás retos entre <span className="font-bold text-emerald-400">${(targetAmount - (targetAmount * tolerance / 100)).toLocaleString('es-CL')}</span> y <span className="font-bold text-emerald-400">${(targetAmount + (targetAmount * tolerance / 100)).toLocaleString('es-CL')}</span>
+               </p>
+             )}
+          </div>
           </div>
 
           {errorMsg && (
