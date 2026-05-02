@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from './Toast';
 import { auth } from '../lib/firebase';
 import { AlertTriangle } from 'lucide-react';
+import { NotificationDropdown } from './notifications/NotificationDropdown';
 
 interface DashboardLayoutProps { children: React.ReactNode; }
 
@@ -32,7 +33,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navItems = [
     { path: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
     { path: '/tournaments', icon: 'trophy', label: 'Torneos' },
-    { path: '/live', icon: 'sports_esports', label: 'En Vivo' },
     { path: '/wallet', icon: 'account_balance_wallet', label: 'Billetera' },
     { path: '/profile', icon: 'settings', label: 'Cuenta', showDot: !emailVerified },
   ];
@@ -46,7 +46,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <nav className="hidden lg:flex gap-6">
             <Link to="/dashboard" className={`font-label-md text-label-md transition-all duration-200 ${location.pathname === '/dashboard' ? 'text-emerald-400 font-bold border-b-2 border-emerald-400' : 'text-slate-400 font-medium hover:text-slate-100'}`}>DASHBOARD</Link>
             <Link to="/tournaments" className={`font-label-md text-label-md transition-all duration-200 ${location.pathname === '/tournaments' ? 'text-emerald-400 font-bold border-b-2 border-emerald-400' : 'text-slate-400 font-medium hover:text-slate-100'}`}>TORNEOS</Link>
-            <Link to="/live" className={`font-label-md text-label-md transition-all duration-200 ${location.pathname === '/live' ? 'text-emerald-400 font-bold border-b-2 border-emerald-400' : 'text-slate-400 font-medium hover:text-slate-100'}`}>EN VIVO</Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">
@@ -54,7 +53,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <span className="material-symbols-outlined text-emerald-400 text-lg">account_balance_wallet</span>
             <span className="text-emerald-400 font-bold font-body-md">${balance.toLocaleString('es-CL')}</span>
           </div>
-          <button className="material-symbols-outlined text-slate-400 hover:text-white transition-all p-2 rounded-lg hover:bg-white/5 active:scale-95">notifications</button>
+          <NotificationDropdown />
           
           <div className="group relative">
             <button className="w-10 h-10 rounded-full border-2 border-emerald-500/50 p-0.5 overflow-hidden active:scale-95 transition-transform flex items-center justify-center bg-surface-container-high text-emerald-400 font-bold">

@@ -5,9 +5,11 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { sendEmailVerification } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
-import { useToast } from '../components/Toast';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 import { CheckCircle2, XCircle, AlertTriangle, Upload, User, Mail, CreditCard, Gamepad2, Save, LogOut, Calendar, Shield, Bell } from 'lucide-react';
+import { ref, uploadBytes } from 'firebase/storage';
+import { storage } from '../lib/firebase';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -33,13 +35,30 @@ export default function Profile() {
     }
   };
 
-  const handleSimulateKYC = async () => {
-    if (!auth.currentUser) return;
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [uploadingKyc, setUploadingKyc] = useState(false);
+
+  const handleSimulateKYC = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !auth.currentUser) return;
+    
+    setUploadingKyc(true);
     try {
+      // Create a reference in Storage: kyc_documents/uid/filename
+      const storageRef = ref(storage, `kyc_documents/${auth.currentUser.uid}/${file.name}`);
+      await uploadBytes(storageRef, file);
+
+      // Update Firestore document
       await updateDoc(doc(db, 'users', auth.currentUser.uid), { kycStatus: 'pending' });
       await refreshUserData();
-      info('Documentos enviados', 'Tu cuenta está en revisión.');
-    } catch (e) { showError('Error', 'No se pudieron enviar los documentos.'); }
+      success('Documento subido', 'Tu cuenta está en revisión y pronto serás verificado.');
+    } catch (e: any) { 
+      console.error(e);
+      showError('Error de subida', 'Asegúrate de que Firebase Storage está habilitado.'); 
+    } finally {
+      setUploadingKyc(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const handleSaveGameIds = async () => {
@@ -109,7 +128,15 @@ export default function Profile() {
                 </div>
                 <div><p className="text-white font-bold text-sm">Identidad (RUT)</p><p className="text-xs text-slate-500">{kycStatus === 'verified' ? 'Verificado' : kycStatus === 'pending' ? 'En revisión' : 'Sin verificar'}</p></div>
               </div>
-              {kycStatus === 'unverified' && <button onClick={handleSimulateKYC} className="text-xs font-bold text-[#00ff66] bg-[#00ff66]/10 px-3 py-1.5 rounded-lg flex items-center gap-1"><Upload className="w-3 h-3" /> Subir Carnet</button>}
+              {kycStatus === 'unverified' && (
+                <>
+                  <input type="file" accept="image/*" ref={fileInputRef} onChange={handleSimulateKYC} className="hidden" />
+                  <button onClick={() => fileInputRef.current?.click()} disabled={uploadingKyc} className="text-xs font-bold text-[#00ff66] bg-[#00ff66]/10 px-3 py-1.5 rounded-lg flex items-center gap-1 disabled:opacity-50">
+                    {uploadingKyc ? <div className="w-3 h-3 border-2 border-[#00ff66]/30 border-t-[#00ff66] rounded-full animate-spin"></div> : <Upload className="w-3 h-3" />}
+                    {uploadingKyc ? 'Subiendo...' : 'Subir Carnet'}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

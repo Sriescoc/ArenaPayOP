@@ -82,11 +82,20 @@ export function MyRequestsPanel() {
         winnerId: null
       });
 
+      // Create notification for the opponent
+      const newNotifRef = doc(collection(db, 'notifications'));
+      batch.set(newNotifRef, {
+        userId: offer.offererId,
+        title: '¡Reto Aceptado!',
+        body: `${userData.firstName} ha aceptado tu oferta de $${offer.amount.toLocaleString('es-CL')}. ¡Entra a la sala ahora!`,
+        link: `/match/${newMatchRef.id}`,
+        read: false,
+        createdAt: serverTimestamp()
+      });
+
       await batch.commit();
       
       success('Oferta Aceptada', '¡Partida creada! Entrando a la sala privada...');
-      // Simulated Email notification
-      info('Email Enviado', `Se ha notificado a ${offer.offererName} que has aceptado su oferta.`);
       
       navigate(`/match/${newMatchRef.id}`);
       
