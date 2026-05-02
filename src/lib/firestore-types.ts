@@ -19,6 +19,47 @@ export interface UserProfile {
   epicId?: string;
 }
 
+export interface MatchRequest {
+  id?: string;
+  creatorId: string;
+  creatorName: string;
+  gameId: string;
+  modeId: string;
+  targetAmount: number;
+  minAmount: number;
+  maxAmount: number;
+  status: 'open' | 'matched' | 'cancelled';
+  createdAt: Timestamp;
+}
+
+export interface MatchOffer {
+  id?: string;
+  requestId: string;
+  offererId: string;
+  offererName: string;
+  amount: number;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: Timestamp;
+}
+
+export interface ActiveMatch {
+  id?: string;
+  requestId: string;
+  gameId: string;
+  modeId: string;
+  player1Id: string; // creator
+  player1Name: string;
+  player2Id: string; // offerer
+  player2Name: string;
+  agreedAmount: number;
+  status: 'active' | 'resolving' | 'completed' | 'disputed' | 'cancelled';
+  expiresAt: Timestamp;
+  createdAt: Timestamp;
+  player1Report: 'win' | 'loss' | null;
+  player2Report: 'win' | 'loss' | null;
+  winnerId: string | null;
+}
+
 export type GameId = 'cr' | 'nba2k' | 'fortnite' | 'fifa';
 
 export interface GameMode {

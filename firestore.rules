@@ -102,15 +102,42 @@ service cloud.firestore {
     // ===============================================================
 
     match /transactions/{transactionId} {
-      // Users can read their own transactions, admins can read all
       allow read: if isAuthenticated() && 
                     (resource.data.userId == request.auth.uid || isAdmin());
-      
-      // Only admin/system can create transactions
       allow create: if isAdmin();
-      
-      // No one can update or delete transactions (immutable ledger)
       allow update, delete: if false;
+    }
+
+    // ===============================================================
+    // Matchmaking (Asynchronous Uber-Style)
+    // ===============================================================
+
+    match /matchRequests/{requestId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.creatorId == request.auth.uid;
+      allow update: if isAuthenticated(); // Allow status updates
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.creatorId == request.auth.uid);
+      
+      match /offers/{offerId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.offererId == request.auth.uid;
+        allow update: if isAuthenticated();
+        allow delete: if isAdmin() || (isAuthenticated() && resource.data.offererId == request.auth.uid);
+      }
+    }
+
+    match /activeMatches/{matchId} {
+      allow read: if isAuthenticated() && 
+                    (resource.data.player1Id == request.auth.uid || resource.data.player2Id == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated(); // Created when offer is accepted
+      allow update: if isAuthenticated() && 
+                    (resource.data.player1Id == request.auth.uid || resource.data.player2Id == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      }
     }
 
     // Default deny

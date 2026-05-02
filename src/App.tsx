@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Wallet from './pages/Wallet';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import ActiveMatchRoom from './pages/ActiveMatchRoom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './components/Toast';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -41,6 +42,7 @@ export default function App() {
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+            <Route path="/match/:id" element={<ProtectedRoute><ActiveMatchRoom /></ProtectedRoute>} />
 
             {/* Catch-all */}
             <Route path="*" element={<Navigate to="/" replace />} />
