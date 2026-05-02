@@ -38,7 +38,7 @@ export function Logo({ className = "" }: { className?: string }) {
           ARENA<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff66] to-[#00cc55]">PAY</span>
         </span>
         <span className="text-[0.65rem] font-bold text-slate-400 tracking-[0.2em] uppercase leading-none mt-1">
-          eSports Betting
+          Torneos eSports
         </span>
       </div>
     </div>

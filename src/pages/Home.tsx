@@ -1,371 +1,152 @@
 import { motion } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User } from 'firebase/auth';
-import { Trophy, Shield, Swords, Target, Flame, ArrowRight, CheckCircle2, Gamepad2, Zap, ChevronRight, Users, Star } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Trophy, Shield, Swords, Flame, ArrowRight, Gamepad2, Zap, Users, Star, ChevronRight } from 'lucide-react';
 import { Logo } from '../components/Logo';
 
-interface HomeProps {
-  user: User | null;
-}
-
-export default function Home({ user }: HomeProps) {
+export default function Home() {
   const navigate = useNavigate();
-
-  const handlePlayClick = () => {
-    if (user) {
-      navigate('/dashboard');
-    } else {
-      navigate('/register');
-    }
-  };
+  const { user } = useAuth();
+  const go = () => navigate(user ? '/dashboard' : '/register');
 
   return (
-    <div className="min-h-screen bg-[#0a0e17] text-white font-sans selection:bg-[#00ff66] selection:text-black flex flex-col overflow-x-hidden">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-[#0a0e17]/80 backdrop-blur-md border-b border-[#1f2937]">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
-          <Logo className="scale-75 md:scale-100 origin-left" />
-          
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-[#1a1a2e] text-white font-sans selection:bg-[#00ff66] selection:text-black">
+      {/* Nav */}
+      <nav className="fixed top-0 w-full z-50 bg-[#1a1a2e]/90 backdrop-blur-md border-b border-[#0f3460]/50">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+          <Logo className="scale-75 md:scale-90 origin-left" />
+          <div className="flex items-center gap-3">
             {user ? (
-              <Link 
-                to="/dashboard" 
-                className="bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(0,255,102,0.3)] hover:shadow-[0_0_25px_rgba(0,255,102,0.5)] text-sm"
-              >
-                Ir a la Arena
-              </Link>
+              <Link to="/dashboard" className="bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider px-5 py-2 rounded-lg text-sm transition-all shadow-[0_0_15px_rgba(0,255,102,0.3)]">Ir a la Arena</Link>
             ) : (
               <>
-                <Link 
-                  to="/login" 
-                  className="text-slate-300 hover:text-white font-bold uppercase tracking-wider text-sm transition-colors hidden sm:block"
-                >
-                  Iniciar Sesión
-                </Link>
-                <Link 
-                  to="/register" 
-                  className="bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(0,255,102,0.3)] hover:shadow-[0_0_25px_rgba(0,255,102,0.5)] text-sm"
-                >
-                  Registrarse
-                </Link>
+                <Link to="/login" className="text-slate-300 hover:text-white font-bold text-sm transition-colors hidden sm:block">Iniciar Sesión</Link>
+                <Link to="/register" className="bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider px-5 py-2 rounded-lg text-sm transition-all shadow-[0_0_15px_rgba(0,255,102,0.3)]">Registro</Link>
               </>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="relative pt-32 pb-20 flex-grow flex items-center border-b border-[#1f2937] min-h-screen">
-        {/* Background Image with Overlay */}
+      {/* Hero */}
+      <main className="relative pt-16 min-h-screen flex items-center">
         <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80" 
-            alt="Gaming Arena" 
-            className="w-full h-full object-cover opacity-20 mix-blend-luminosity"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/50 via-[#0a0e17]/80 to-[#0a0e17]"></div>
-          <motion.div 
-            animate={{ 
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3]
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#00ff66]/10 rounded-full blur-[120px] pointer-events-none"
-          ></motion.div>
+          <img src="/images/hero-bg.jpg" alt="Arena" className="w-full h-full object-cover opacity-25" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a2e]/50 via-[#1a1a2e]/80 to-[#1a1a2e]"></div>
         </div>
-
-        <div className="max-w-7xl mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 items-center relative z-10 w-full">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-center lg:text-left"
-          >
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#131b26] border border-[#1f2937] rounded-full mb-6 shadow-lg"
-            >
-              <Flame className="w-4 h-4 text-[#00ff66]" />
-              <span className="text-[10px] md:text-xs font-bold text-[#00ff66] tracking-widest uppercase">La Plataforma #1 de eSports en Chile</span>
-            </motion.div>
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-5xl sm:text-6xl lg:text-8xl font-black text-white leading-[1.1] tracking-tight mb-6 uppercase"
-            >
-              TU HABILIDAD. <br className="hidden sm:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff66] to-[#00cc55] drop-shadow-[0_0_15px_rgba(0,255,102,0.5)]">
-                TU DINERO.
-              </span>
-            </motion.h1>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-lg md:text-xl text-slate-400 max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed font-medium"
-            >
-              Compite en Clash Royale y NBA. Apuesta por ti mismo, vence a tus rivales y retira tus ganancias al instante.
-            </motion.p>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
-            >
-              <button 
-                onClick={handlePlayClick}
-                className="bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider px-8 py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_30px_rgba(0,255,102,0.3)] hover:shadow-[0_0_40px_rgba(0,255,102,0.5)] hover:-translate-y-1 text-lg w-full sm:w-auto group"
-              >
-                <Gamepad2 className="w-6 h-6 group-hover:rotate-12 transition-transform" /> Jugar Ahora
-              </button>
-              <a 
-                href="#juegos"
-                className="bg-[#131b26] hover:bg-[#1f2937] text-white font-bold uppercase tracking-wider px-8 py-4 rounded-xl flex items-center justify-center gap-2 transition-all border border-[#1f2937] hover:border-[#374151] w-full sm:w-auto group"
-              >
-                Ver Juegos <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </a>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="mt-12 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-slate-400 font-bold uppercase tracking-wider"
-            >
-              <div className="flex items-center gap-2 bg-[#131b26] px-4 py-2 rounded-lg border border-[#1f2937]"><CheckCircle2 className="w-4 h-4 text-[#00ff66]" /> 100% Seguro</div>
-              <div className="flex items-center gap-2 bg-[#131b26] px-4 py-2 rounded-lg border border-[#1f2937]"><Zap className="w-4 h-4 text-[#00ff66]" /> Retiros 24/7</div>
-              <div className="flex items-center gap-2 bg-[#131b26] px-4 py-2 rounded-lg border border-[#1f2937]"><Users className="w-4 h-4 text-[#00ff66]" /> +10k Jugadores</div>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 1, delay: 0.2, type: "spring" }}
-            className="relative hidden lg:block"
-          >
-            <div className="absolute -inset-4 bg-[#00ff66]/20 blur-3xl rounded-full"></div>
-            <div className="bg-[#131b26] relative p-2 border border-[#1f2937] rounded-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500 shadow-2xl">
-              <img 
-                src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80" 
-                alt="Gamer holding controller" 
-                className="rounded-xl w-full h-auto object-cover"
-              />
-              
-              {/* Floating Badges */}
-              <motion.div 
-                animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -bottom-6 -left-6 bg-[#0a0e17] border border-[#1f2937] p-4 rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.8)] flex items-center gap-4"
-              >
-                <div className="w-12 h-12 bg-[#00ff66]/20 rounded-full flex items-center justify-center">
-                  <span className="text-[#00ff66] font-black text-xl">$</span>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Premio Ganado</p>
-                  <p className="text-white font-black text-xl">$25.000 CLP</p>
-                </div>
-              </motion.div>
-
-              <motion.div 
-                animate={{ y: [0, 15, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute -top-6 -right-6 bg-[#0a0e17] border border-[#1f2937] p-4 rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.8)] flex items-center gap-4"
-              >
-                <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                  <Star className="w-6 h-6 text-yellow-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Top Jugador</p>
-                  <p className="text-white font-black text-xl">Liga Master</p>
-                </div>
-              </motion.div>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-10 items-center relative z-10 w-full py-20">
+          <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} className="text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#16213e] border border-[#0f3460] rounded-full mb-5">
+              <Flame className="w-3.5 h-3.5 text-[#00ff66]" />
+              <span className="text-[10px] font-bold text-[#00ff66] tracking-widest uppercase">La plataforma #1 de eSports en Chile</span>
             </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight mb-5 uppercase">
+              Apuesta en<br /><span className="text-[#00ff66]">tus habilidades.</span>
+            </h1>
+            <p className="text-lg text-slate-400 max-w-lg mx-auto lg:mx-0 mb-8 font-medium">
+              Compite en Clash Royale, Fortnite, NBA 2K y EA FC. Desafía rivales, gana partidas y retira tus ganancias al instante.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+              <button onClick={go} className="bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider px-8 py-4 rounded-xl flex items-center gap-2 transition-all shadow-[0_0_30px_rgba(0,255,102,0.3)] hover:-translate-y-1 text-lg w-full sm:w-auto">
+                <Gamepad2 className="w-6 h-6" /> Jugar Ahora
+              </button>
+              <a href="#juegos" className="bg-[#16213e] hover:bg-[#0f3460] text-white font-bold uppercase tracking-wider px-8 py-4 rounded-xl flex items-center gap-2 transition-all border border-[#0f3460] w-full sm:w-auto justify-center">
+                Ver Juegos <ChevronRight className="w-5 h-5" />
+              </a>
+            </div>
+            <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-400 font-bold uppercase tracking-wider">
+              {[{ icon: Shield, t: '100% Seguro' }, { icon: Zap, t: 'Retiros 24/7' }, { icon: Users, t: '+10k Jugadores' }].map((b, i) => (
+                <div key={i} className="flex items-center gap-1.5 bg-[#16213e] px-3 py-2 rounded-lg border border-[#0f3460]"><b.icon className="w-3.5 h-3.5 text-[#00ff66]" /> {b.t}</div>
+              ))}
+            </div>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }} className="hidden lg:grid grid-cols-2 gap-4">
+            {[
+              { img: '/images/clash-royale.jpg', name: 'Clash Royale' },
+              { img: '/images/fortnite.jpg', name: 'Fortnite' },
+              { img: '/images/nba2k.jpg', name: 'NBA 2K' },
+              { img: '/images/eafc.jpg', name: 'EA FC' },
+            ].map((g, i) => (
+              <motion.div key={i} whileHover={{ y: -5 }} className="relative rounded-xl overflow-hidden border border-[#0f3460] hover:border-[#00ff66]/50 transition-colors cursor-pointer group" onClick={go}>
+                <div className="aspect-[4/3]">
+                  <img src={g.img} alt={g.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                  <p className="absolute bottom-3 left-3 text-sm font-black text-white uppercase">{g.name}</p>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </main>
 
-      {/* Features Section */}
-      <div className="py-32 bg-[#0a0e17] relative z-10 border-b border-[#1f2937]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase mb-4">¿Por qué ArenaPay?</h2>
-            <div className="w-24 h-1 bg-[#00ff66] mx-auto rounded-full"></div>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="bg-[#131b26] p-8 rounded-2xl border border-[#1f2937] hover:border-[#00ff66]/50 transition-all duration-300 group shadow-lg hover:-translate-y-2"
-            >
-              <div className="w-16 h-16 bg-[#00ff66]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#00ff66]/20 transition-all">
-                <Trophy className="w-8 h-8 text-[#00ff66]" />
-              </div>
-              <h3 className="text-2xl font-black text-white uppercase tracking-wide mb-4">Compite y Gana</h3>
-              <p className="text-slate-400 leading-relaxed font-medium text-lg">Encuentra rivales de tu nivel, apuesta la cantidad que desees y demuestra quién es el mejor en la arena.</p>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ delay: 0.2 }}
-              className="bg-[#131b26] p-8 rounded-2xl border border-[#1f2937] hover:border-[#00ff66]/50 transition-all duration-300 group shadow-lg hover:-translate-y-2"
-            >
-              <div className="w-16 h-16 bg-[#00ff66]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#00ff66]/20 transition-all">
-                <Shield className="w-8 h-8 text-[#00ff66]" />
-              </div>
-              <h3 className="text-2xl font-black text-white uppercase tracking-wide mb-4">100% Seguro</h3>
-              <p className="text-slate-400 leading-relaxed font-medium text-lg">Sistema de verificación de identidad (KYC) y retención de fondos segura hasta que se confirme el resultado.</p>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ delay: 0.4 }}
-              className="bg-[#131b26] p-8 rounded-2xl border border-[#1f2937] hover:border-[#00ff66]/50 transition-all duration-300 group shadow-lg hover:-translate-y-2"
-            >
-              <div className="w-16 h-16 bg-[#00ff66]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#00ff66]/20 transition-all">
-                <Zap className="w-8 h-8 text-[#00ff66]" />
-              </div>
-              <h3 className="text-2xl font-black text-white uppercase tracking-wide mb-4">Retiros Rápidos</h3>
-              <p className="text-slate-400 leading-relaxed font-medium text-lg">Tus ganancias disponibles para retirar a tu cuenta bancaria chilena de forma rápida y sin complicaciones.</p>
-            </motion.div>
+      {/* Features */}
+      <div className="py-24 bg-[#16213e] border-y border-[#0f3460]/50">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <h2 className="text-3xl md:text-4xl font-black text-center uppercase tracking-tight mb-12">¿Por qué ArenaPay?</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { icon: Trophy, title: 'Compite y Gana', desc: 'Desafía rivales de tu nivel en partidas 1v1 por dinero real en tus juegos favoritos.' },
+              { icon: Shield, title: '100% Seguro', desc: 'Verificación de identidad, pagos seguros y soporte 24/7 para todos los jugadores.' },
+              { icon: Zap, title: 'Retiros Rápidos', desc: 'Retira tus ganancias directamente a tu cuenta bancaria chilena sin demoras.' },
+            ].map((f, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.15 }} className="bg-[#1a1a2e] p-8 rounded-2xl border border-[#0f3460] hover:border-[#00ff66]/40 transition-all hover:-translate-y-1">
+                <f.icon className="w-10 h-10 text-[#00ff66] mb-4" />
+                <h3 className="text-xl font-black text-white uppercase mb-3">{f.title}</h3>
+                <p className="text-slate-400 font-medium">{f.desc}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Games Preview Section */}
-      <div id="juegos" className="py-32 bg-[#131b26] relative z-10 border-b border-[#1f2937]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight uppercase mb-6">Juegos Disponibles</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto font-medium text-xl">Seleccionamos los juegos más competitivos para que demuestres tu nivel.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-10">
-            {/* Clash Royale */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              whileHover={{ y: -10 }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="group relative rounded-3xl overflow-hidden border-2 border-[#1f2937] hover:border-[#00ff66] transition-all duration-500 shadow-2xl cursor-pointer"
-              onClick={handlePlayClick}
-            >
-              <div className="aspect-[4/3] relative">
-                <img 
-                  src="https://techcrunch.com/wp-content/uploads/2016/03/clash-royale-header.png" 
-                  alt="Clash Royale" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/60 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-500 group-hover:-translate-y-4">
-                  <h3 className="text-4xl font-black text-white uppercase tracking-wider drop-shadow-lg mb-4 glow-text">Clash Royale</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="bg-[#00ff66] text-black text-xs font-black px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-[0_0_15px_rgba(0,255,102,0.5)]">1 VS 1</span>
-                    <span className="bg-[#131b26]/80 backdrop-blur-sm border border-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">2 VS 2</span>
+      {/* Games */}
+      <div id="juegos" className="py-24 bg-[#1a1a2e]">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <h2 className="text-3xl md:text-5xl font-black text-center uppercase tracking-tight mb-12">Juegos Disponibles</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { img: '/images/clash-royale.jpg', name: 'Clash Royale', tags: ['1v1', '2v2'] },
+              { img: '/images/fortnite.jpg', name: 'Fortnite', tags: ['Solo', 'Dúo'] },
+              { img: '/images/nba2k.jpg', name: 'NBA 2K', tags: ['PS5', 'PS4'] },
+              { img: '/images/eafc.jpg', name: 'EA FC / FIFA', tags: ['1v1'] },
+            ].map((g, i) => (
+              <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} whileHover={{ y: -8 }} viewport={{ once: true }} className="group rounded-2xl overflow-hidden border-2 border-[#0f3460] hover:border-[#00ff66] transition-all cursor-pointer shadow-xl" onClick={go}>
+                <div className="aspect-[3/4] relative">
+                  <img src={g.img} alt={g.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                  <div className="absolute top-3 right-3 bg-[#00ff66] text-black text-[8px] font-black uppercase px-2 py-0.5 rounded flex items-center gap-0.5"><Flame className="w-2.5 h-2.5" /> HOT</div>
+                  <div className="absolute bottom-0 left-0 p-5 w-full">
+                    <h3 className="text-2xl font-black text-white uppercase mb-2">{g.name}</h3>
+                    <div className="flex gap-1.5">{g.tags.map((t, j) => <span key={j} className="text-[9px] font-bold bg-white/10 px-2 py-0.5 rounded text-slate-300">{t}</span>)}</div>
                   </div>
                 </div>
-                <div className="absolute inset-0 border-4 border-[#00ff66] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-              </div>
-            </motion.div>
-
-            {/* EA FC 24 */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              whileHover={{ y: -10 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ delay: 0.1 }}
-              className="group relative rounded-3xl overflow-hidden border-2 border-[#1f2937] hover:border-[#00ff66] transition-all duration-500 shadow-2xl cursor-pointer"
-              onClick={handlePlayClick}
-            >
-              <div className="aspect-[4/3] relative">
-                <img 
-                  src="https://media.contentapi.ea.com/content/dam/ea/fc/fc-24/common/fc24-featured-image-16x9.jpg.adapt.crop16x9.1023w.jpg" 
-                  alt="EA FC 24" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/60 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-500 group-hover:-translate-y-4">
-                  <h3 className="text-4xl font-black text-white uppercase tracking-wider drop-shadow-lg mb-4 glow-text">EA FC 24</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="bg-[#00ff66] text-black text-xs font-black px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-[0_0_15px_rgba(0,255,102,0.5)]">1 VS 1</span>
-                  </div>
-                </div>
-                <div className="absolute inset-0 border-4 border-[#00ff66] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-              </div>
-            </motion.div>
-
-            {/* NBA */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              whileHover={{ y: -10 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ delay: 0.2 }}
-              className="group relative rounded-3xl overflow-hidden border-2 border-[#1f2937] hover:border-[#ff6b00] transition-all duration-500 shadow-2xl cursor-pointer"
-              onClick={handlePlayClick}
-            >
-              <div className="aspect-[4/3] relative">
-                <img 
-                  src="https://cdn.cloudflare.steamstatic.com/steam/apps/2338770/header.jpg" 
-                  alt="NBA" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/60 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-500 group-hover:-translate-y-4">
-                  <h3 className="text-4xl font-black text-white uppercase tracking-wider drop-shadow-lg mb-4 text-[#ff8800] group-hover:text-white transition-colors">NBA</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="bg-[#ff6b00] text-black text-xs font-black px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-[0_0_15px_rgba(255,107,0,0.5)]">2K24 (PS5)</span>
-                    <span className="bg-[#131b26]/80 backdrop-blur-sm border border-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider">2K24 (PS4)</span>
-                  </div>
-                </div>
-                <div className="absolute inset-0 border-4 border-[#ff6b00] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-              </div>
-            </motion.div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="py-32 bg-[#0a0e17] relative z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,102,0.1)_0%,transparent_70%)]"></div>
-        <motion.div 
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto px-4 text-center relative z-10"
-        >
-          <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 uppercase">¿Listo para la acción?</h2>
-          <p className="text-2xl text-slate-400 mb-12 font-medium">Regístrate ahora, deposita y empieza a ganar dinero real con tus habilidades.</p>
-          <button 
-            onClick={handlePlayClick}
-            className="bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider px-12 py-6 rounded-2xl transition-all shadow-[0_0_40px_rgba(0,255,102,0.4)] hover:shadow-[0_0_60px_rgba(0,255,102,0.6)] hover:-translate-y-2 text-2xl inline-flex items-center gap-4 group"
-          >
-            Crear Cuenta Gratis <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+      {/* CTA */}
+      <div className="py-24 bg-[#16213e] border-t border-[#0f3460]/50 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,102,0.08)_0%,transparent_60%)]"></div>
+        <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
+          <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight mb-6">¿Listo para ganar?</h2>
+          <p className="text-xl text-slate-400 mb-10">Regístrate gratis y empieza a competir por dinero real.</p>
+          <button onClick={go} className="bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider px-10 py-5 rounded-xl text-xl inline-flex items-center gap-3 transition-all shadow-[0_0_40px_rgba(0,255,102,0.3)] hover:-translate-y-1">
+            Crear Cuenta Gratis <ArrowRight className="w-6 h-6" />
           </button>
-        </motion.div>
+        </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#05070a] py-12 border-t border-[#1f2937]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <Logo className="opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all" />
-          <div className="flex gap-6 text-sm font-bold text-slate-500 uppercase tracking-wider">
-            <Link to="/terminos" className="hover:text-[#00ff66] transition-colors">Términos</Link>
-            <Link to="/privacidad" className="hover:text-[#00ff66] transition-colors">Privacidad</Link>
+      <footer className="bg-[#0d0d1a] py-10 border-t border-[#0f3460]/30">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+          <Logo className="opacity-40 grayscale hover:grayscale-0 hover:opacity-100 transition-all" />
+          <div className="flex gap-5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <Link to="/terminos" className="hover:text-[#00ff66]">Términos</Link>
+            <Link to="/privacidad" className="hover:text-[#00ff66]">Privacidad</Link>
           </div>
-          <p className="text-slate-600 text-sm font-medium">© 2024 ArenaPay. Todos los derechos reservados.</p>
+          <p className="text-slate-600 text-xs">© {new Date().getFullYear()} ArenaPay</p>
         </div>
       </footer>
     </div>

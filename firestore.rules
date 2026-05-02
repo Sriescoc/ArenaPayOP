@@ -4,22 +4,6 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     // ===============================================================
-    // Assumed Data Model
-    // ===============================================================
-    //
-    // Collection: users
-    // Document ID: {userId} (matches Auth UID)
-    // Fields:
-    //   - uid: string (required, immutable) - Firebase Auth UID
-    //   - firstName: string (required, 2-50 chars)
-    //   - lastName: string (required, 2-50 chars)
-    //   - rut: string (required, matches RUT format)
-    //   - email: string (required, matches email format)
-    //   - createdAt: timestamp (required, immutable)
-    //
-    // ===============================================================
-
-    // ===============================================================
     // Helper Functions
     // ===============================================================
     
@@ -42,13 +26,12 @@ service cloud.firestore {
     }
 
     function isValidRut(rut) {
-      // Basic format check: XX.XXX.XXX-X or X.XXX.XXX-X
       return rut is string && rut.matches("^\\d{1,2}(\\.\\d{3}){2}-[0-9kK]$");
     }
 
     function isValidUser(data) {
       return data.keys().hasAll(['uid', 'firstName', 'lastName', 'rut', 'email', 'createdAt']) &&
-             data.keys().hasOnly(['uid', 'firstName', 'lastName', 'rut', 'email', 'createdAt', 'role', 'birthDate', 'supercellTag', 'nbaId', 'eaId', 'balance', 'withdrawableBalance', 'kycStatus']) &&
+             data.keys().hasOnly(['uid', 'firstName', 'lastName', 'rut', 'email', 'createdAt', 'role', 'birthDate', 'phone', 'supercellTag', 'nbaId', 'eaId', 'balance', 'withdrawableBalance', 'kycStatus']) &&
              data.uid == request.auth.uid &&
              data.firstName is string && data.firstName.size() >= 2 && data.firstName.size() <= 50 &&
              data.lastName is string && data.lastName.size() >= 2 && data.lastName.size() <= 50 &&
@@ -56,6 +39,7 @@ service cloud.firestore {
              isValidEmail(data.email) &&
              data.createdAt is timestamp &&
              (!('birthDate' in data) || (data.birthDate is string && data.birthDate.size() <= 20)) &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() <= 20)) &&
              (!('supercellTag' in data) || (data.supercellTag is string && data.supercellTag.size() <= 50)) &&
              (!('nbaId' in data) || (data.nbaId is string && data.nbaId.size() <= 50)) &&
              (!('eaId' in data) || (data.eaId is string && data.eaId.size() <= 50)) &&
@@ -65,7 +49,7 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // Rules
+    // Users
     // ===============================================================
 
     match /users/{userId} {
@@ -82,6 +66,51 @@ service cloud.firestore {
                       request.resource.data.role == resource.data.role;
                       
       allow delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Tournaments
+    // ===============================================================
+
+    match /tournaments/{tournamentId} {
+      // Any authenticated user can read tournaments
+      allow read: if isAuthenticated();
+      
+      // Only admins can create/update/delete tournaments
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Inscriptions
+    // ===============================================================
+
+    match /inscriptions/{inscriptionId} {
+      // Users can read their own inscriptions, admins can read all
+      allow read: if isAuthenticated() && 
+                    (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Users can create their own inscriptions
+      allow create: if isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid;
+      
+      // Only admins can update/delete inscriptions (results, status changes)
+      allow update, delete: if isAdmin();
+    }
+
+    // ===============================================================
+    // Transactions
+    // ===============================================================
+
+    match /transactions/{transactionId} {
+      // Users can read their own transactions, admins can read all
+      allow read: if isAuthenticated() && 
+                    (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Only admin/system can create transactions
+      allow create: if isAdmin();
+      
+      // No one can update or delete transactions (immutable ledger)
+      allow update, delete: if false;
     }
 
     // Default deny

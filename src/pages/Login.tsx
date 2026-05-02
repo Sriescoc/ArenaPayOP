@@ -1,170 +1,97 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db, googleProvider } from '../lib/firebase';
-import { ArrowRight, Mail, Lock, AlertCircle } from 'lucide-react';
+import { auth, googleProvider } from '../lib/firebase';
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { useToast } from '../components/Toast';
 
 export default function Login() {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const { success, error: showError } = useToast();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!email || !password) { setError('Completa todos los campos.'); return; }
     setLoading(true);
-
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      navigate('/dashboard');
+      await signInWithEmailAndPassword(auth, email, password);
+      success('¡Bienvenido!', 'Sesión iniciada correctamente.');
     } catch (err: any) {
-      console.error(err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
         setError('Correo o contraseña incorrectos.');
-      } else {
-        setError('Ocurrió un error al iniciar sesión. Por favor, intenta nuevamente.');
-      }
-    } finally {
-      setLoading(false);
-    }
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Demasiados intentos. Espera unos minutos.');
+      } else { setError('Error al iniciar sesión. Inténtalo de nuevo.'); }
+    } finally { setLoading(false); }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogle = async () => {
     setError(null);
-    setLoading(true);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-      
-      if (userDoc.exists()) {
-        navigate('/dashboard');
-      } else {
-        await auth.signOut();
-        setError('No tienes una cuenta registrada. Por favor, crea una cuenta primero.');
-      }
+      await signInWithPopup(auth, googleProvider);
+      success('¡Bienvenido!', 'Sesión iniciada con Google.');
     } catch (err: any) {
-      console.error(err);
-      if (err.code === 'auth/unauthorized-domain') {
-        setError(`Error de configuración: Debes agregar este dominio (${window.location.hostname}) en Firebase -> Authentication -> Settings -> Authorized Domains.`);
-      } else if (err.code === 'auth/invalid-credential') {
-        setError('Las credenciales de Google no son válidas o han expirado.');
-      } else if (err.code === 'auth/popup-closed-by-user') {
-        setError('La ventana de inicio de sesión fue cerrada antes de completar el proceso.');
-      } else {
-        setError(`Error al iniciar sesión con Google. Por favor intenta nuevamente.`);
-      }
-    } finally {
-      setLoading(false);
+      if (err.code !== 'auth/popup-closed-by-user') showError('Error', 'No se pudo iniciar sesión con Google.');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 md:py-20 relative bg-[#0a0e17] font-sans">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&q=80" 
-          alt="Pro Gaming Setup Background" 
-          className="w-full h-full object-cover opacity-30 mix-blend-screen"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/60 via-[#0a0e17]/80 to-[#0a0e17]"></div>
-      </div>
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-[#1a1a2e] font-sans relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center opacity-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a2e] via-[#1a1a2e]/90 to-[#1a1a2e]"></div>
 
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-[#131b26]/90 backdrop-blur-xl max-w-md w-full relative z-10 border border-[#1f2937] hover:border-[#00ff66]/30 transition-colors rounded-3xl shadow-[0_0_50px_rgba(0,255,102,0.1)] p-6 md:p-8"
-      >
-        <div className="flex flex-col items-center mb-8">
-          <Link to="/inicio">
-            <Logo className="mb-6 scale-100 md:scale-110" />
-          </Link>
-          <div className="text-center">
-            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase">INICIAR SESIÓN</h1>
-            <p className="text-xs md:text-sm text-[#00ff66] font-bold uppercase tracking-wider mt-1">Bienvenido de vuelta a la arena</p>
-          </div>
-        </div>
-
-        <button 
-          type="button"
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-          className="w-full bg-white text-black font-black uppercase tracking-wider py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-200 transition-all disabled:opacity-50 mb-8 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm md:text-base"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-          </svg>
-          Ingresar con Google
-        </button>
-
-        <div className="relative my-8">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#1f2937]"></div></div>
-          <div className="relative flex justify-center text-sm"><span className="px-4 bg-[#131b26] text-slate-500 font-bold uppercase tracking-wider">O ingresa con tu correo</span></div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5 text-[#00ff66]" /> Email
-            </label>
-            <input 
-              type="email" 
-              required
-              placeholder="tu@email.com"
-              className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-            />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full max-w-md">
+        <div className="bg-[#16213e]/95 backdrop-blur-xl border border-[#0f3460]/50 rounded-2xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+          <div className="flex flex-col items-center mb-8">
+            <Link to="/inicio"><Logo className="mb-4" /></Link>
+            <h1 className="text-2xl font-black text-white uppercase tracking-wider">Iniciar Sesión</h1>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <Lock className="w-3.5 h-3.5 text-[#00ff66]" /> Contraseña
-            </label>
-            <input 
-              type="password" 
-              required
-              className="w-full bg-[#0a0e17] border border-[#1f2937] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600"
-              value={formData.password}
-              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-            />
-          </div>
-
-          {error && (
-            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
-              <AlertCircle className="text-red-400 w-5 h-5 shrink-0 mt-0.5" />
-              <p className="text-sm text-red-200">{error}</p>
-            </div>
-          )}
-
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(0,255,102,0.2)] hover:shadow-[0_0_30px_rgba(0,255,102,0.4)] disabled:opacity-50 disabled:cursor-not-allowed mt-4"
-          >
-            {loading ? (
-              <div className="w-6 h-6 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-            ) : (
-              <>
-                INGRESAR <ArrowRight className="w-5 h-5" />
-              </>
-            )}
+          {/* Google Button */}
+          <button onClick={handleGoogle} className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-800 font-bold py-3.5 rounded-xl transition-all mb-6 shadow-lg hover:shadow-xl">
+            <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Continuar con Google
           </button>
-        </form>
 
-        <p className="mt-8 text-center text-sm text-slate-500 font-medium">
-          ¿No tienes cuenta? <Link to="/register" className="text-[#00ff66] hover:text-[#00cc55] hover:underline font-bold transition-colors">Regístrate aquí</Link>
-        </p>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex-1 h-px bg-[#0f3460]"></div>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">o</span>
+            <div className="flex-1 h-px bg-[#0f3460]"></div>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-2"><Mail className="w-3.5 h-3.5 text-[#00ff66]" /> Email</label>
+              <input type="email" required placeholder="tu@email.com" className="w-full bg-[#0a0e17] border border-[#0f3460] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 outline-none transition-colors placeholder:text-slate-600" value={email} onChange={e => setEmail(e.target.value)} autoFocus />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-2"><Lock className="w-3.5 h-3.5 text-[#00ff66]" /> Contraseña</label>
+              <div className="relative">
+                <input type={showPass ? 'text' : 'password'} required placeholder="••••••••" className="w-full bg-[#0a0e17] border border-[#0f3460] focus:border-[#00ff66] text-white rounded-xl px-4 py-3 pr-12 outline-none transition-colors placeholder:text-slate-600" value={password} onChange={e => setPassword(e.target.value)} />
+                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">{showPass ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}</button>
+              </div>
+            </div>
+
+            {error && (
+              <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-2">
+                <AlertCircle className="text-red-400 w-4 h-4 shrink-0 mt-0.5" /><p className="text-sm text-red-300">{error}</p>
+              </motion.div>
+            )}
+
+            <button type="submit" disabled={loading} className="w-full bg-[#00ff66] hover:bg-[#00cc55] text-black font-black uppercase tracking-wider py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(0,255,102,0.3)] disabled:opacity-50 mt-2">
+              {loading ? <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div> : 'INICIAR SESIÓN'}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-slate-500">¿No tienes cuenta? <Link to="/register" className="text-[#00ff66] hover:underline font-bold">Regístrate</Link></p>
+        </div>
       </motion.div>
     </div>
   );
