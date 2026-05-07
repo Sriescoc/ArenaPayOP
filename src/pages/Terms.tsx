@@ -6,68 +6,68 @@ import { Logo } from '../components/Logo';
 
 export default function Terms() {
   return (
-    <div className="min-h-screen bg-[#0a0e17] text-slate-300 py-12 px-6 font-sans">
+    <div className="min-h-screen bg-navy-950 text-slate-300 py-12 px-6 font-sans selection:bg-brand-primary selection:text-black">
       <div className="max-w-4xl mx-auto">
-        <Link to="/" className="inline-flex items-center gap-2 text-[#00ff66] hover:text-[#00cc55] mb-8 transition-colors font-bold uppercase tracking-wider text-sm">
-          <ArrowLeft className="w-4 h-4" /> Volver al inicio
+        <Link to="/" className="inline-flex items-center gap-2 text-brand-primary hover:text-brand-secondary mb-12 transition-all font-black uppercase tracking-widest text-xs group">
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Volver al inicio
         </Link>
         
-        <div className="flex items-center gap-4 mb-12">
-          <div className="w-16 h-16 bg-[#00ff66]/10 rounded-2xl flex items-center justify-center border border-[#00ff66]/20">
-            <FileText className="w-8 h-8 text-[#00ff66]" />
+        <div className="flex items-center gap-6 mb-12">
+          <div className="w-20 h-20 bg-brand-primary/10 rounded-[2rem] flex items-center justify-center border border-brand-primary/20 shadow-[0_0_30px_rgba(0,255,102,0.1)]">
+            <FileText className="w-10 h-10 text-brand-primary" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight uppercase">Términos y Condiciones</h1>
-            <p className="text-slate-400 mt-1 font-medium">Última actualización: Abril 2026</p>
+            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase font-display glow-text">Términos y Condiciones</h1>
+            <p className="text-brand-primary/60 mt-1 font-black uppercase tracking-[0.2em] text-[10px]">Última actualización: Mayo 2026</p>
           </div>
         </div>
 
-        <div className="bg-[#131b26] border border-[#1f2937] rounded-2xl p-8 md:p-12 space-y-8 text-sm md:text-base leading-relaxed shadow-xl">
+        <div className="bg-navy-900/60 backdrop-blur-xl border border-navy-700 rounded-[2.5rem] p-8 md:p-16 space-y-12 text-sm md:text-base leading-relaxed shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-[100px] -mr-32 -mt-32"></div>
+
           <section>
-            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2 uppercase tracking-wider">
-              <span className="text-[#00ff66]">1.</span> Naturaleza del Servicio
+            <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3 uppercase tracking-tighter font-display">
+              <span className="text-brand-primary">01.</span> Naturaleza del Servicio
             </h2>
-            <p className="text-slate-400">
-              ArenaPay es una plataforma de intermediación que permite a usuarios mayores de edad competir en videojuegos de habilidad (eSports) apostando dinero real sobre su propio desempeño. ArenaPay NO es un casino ni una plataforma de juegos de azar. El resultado de los desafíos depende 100% de la habilidad de los jugadores.
+            <p className="text-slate-400 font-medium">
+              ArenaPay es una plataforma de intermediación que permite a usuarios mayores de edad competir en videojuegos de habilidad (eSports) apostando dinero real sobre su propio desempeño. ArenaPay <span className="text-white font-bold">NO es un casino</span> ni una plataforma de juegos de azar. El resultado de los desafíos depende 100% de la habilidad de los jugadores.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2 uppercase tracking-wider">
-              <span className="text-[#00ff66]">2.</span> Requisitos de Elegibilidad
+            <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3 uppercase tracking-tighter font-display">
+              <span className="text-brand-primary">02.</span> Requisitos de Elegibilidad
             </h2>
-            <ul className="list-disc pl-5 space-y-2 text-slate-400">
-              <li>Ser mayor de 18 años de edad.</li>
-              <li>Residir en territorio chileno o poseer un RUT válido.</li>
-              <li>Completar satisfactoriamente el proceso de verificación de identidad (KYC).</li>
-              <li>No tener cuentas suspendidas previamente en la plataforma.</li>
-            </ul>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                "Ser mayor de 18 años de edad.",
+                "Residir en territorio chileno con RUT válido.",
+                "Completar proceso de KYC satisfactorio.",
+                "No tener cuentas suspendidas previamente."
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 p-4 bg-navy-800 rounded-2xl border border-navy-700">
+                  <Shield className="w-5 h-5 text-brand-primary shrink-0" />
+                  <span className="text-slate-300 font-bold text-xs uppercase tracking-wide">{item}</span>
+                </div>
+              ))}
+            </div>
           </section>
 
           <section>
-            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2 uppercase tracking-wider">
-              <span className="text-[#00ff66]">3.</span> Verificación de Identidad (KYC)
+            <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3 uppercase tracking-tighter font-display">
+              <span className="text-brand-primary">03.</span> Verificación de Identidad (KYC)
             </h2>
-            <p className="text-slate-400">
-              Para garantizar la seguridad de la comunidad y cumplir con las normativas vigentes, ArenaPay exige la verificación de correo electrónico y documento de identidad (RUT) antes de permitir depósitos, participación en partidas por dinero real o retiros de fondos.
+            <p className="text-slate-400 font-medium leading-loose">
+              Para garantizar la seguridad de la comunidad y cumplir con las normativas vigentes, ArenaPay exige la verificación de documento de identidad (RUT) y verificación facial antes de permitir depósitos de alto volumen o retiros de fondos. La información es encriptada y tratada bajo estrictos estándares de ciberseguridad.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2 uppercase tracking-wider">
-              <span className="text-[#00ff66]">4.</span> Fondos y Retiros
+            <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3 uppercase tracking-tighter font-display">
+              <span className="text-brand-primary">04.</span> Juego Limpio
             </h2>
-            <p className="text-slate-400">
-              Los fondos depositados en ArenaPay solo pueden ser utilizados para competir en la plataforma. Los retiros están sujetos a verificación de identidad y pueden tomar hasta 48 horas hábiles en procesarse. ArenaPay retiene una comisión por intermediación en cada partida, la cual es informada antes de aceptar el desafío.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2 uppercase tracking-wider">
-              <span className="text-[#00ff66]">5.</span> Juego Limpio y Anti-Trampas
-            </h2>
-            <p className="text-slate-400">
-              Cualquier intento de fraude, uso de software de terceros (hacks, bots), manipulación de red (lag switching), o colusión resultará en el baneo permanente de la cuenta y la confiscación de los fondos. Las disputas son resueltas por el equipo de moderación de ArenaPay basándose en pruebas de video.
+            <p className="text-slate-400 font-medium bg-red-500/5 border border-red-500/10 p-6 rounded-2xl">
+              Cualquier intento de fraude, uso de software de terceros (hacks, bots) o manipulación de red resultará en el <span className="text-red-400 font-bold">bloqueo inmediato y permanente</span> de la cuenta. Las disputas son analizadas por nuestro equipo técnico basándose en telemetría de juego.
             </p>
           </section>
         </div>

@@ -2,7 +2,7 @@
   "entities": {
     "UserProfile": {
       "title": "User Profile",
-      "description": "Stores user registration data including Chilean RUT.",
+      "description": "Stores user registration data including Chilean RUT and KYC status.",
       "type": "object",
       "properties": {
         "uid": { "type": "string", "description": "Firebase Auth UID" },
@@ -10,15 +10,49 @@
         "lastName": { "type": "string", "description": "User's last name" },
         "rut": { "type": "string", "description": "Chilean RUT (formatted)" },
         "email": { "type": "string", "format": "email", "description": "User's email address" },
+        "birthDate": { "type": "string", "format": "date", "description": "User's birth date" },
+        "kycStatus": { "type": "string", "enum": ["unverified", "pending", "verified", "rejected"], "description": "Identity verification status" },
+        "idFrontUrl": { "type": "string", "description": "URL of ID card front image" },
+        "idBackUrl": { "type": "string", "description": "URL of ID card back image" },
+        "selfieUrl": { "type": "string", "description": "URL of user selfie for verification" },
+        "balance": { "type": "number", "description": "User's current balance" },
         "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of creation" }
       },
-      "required": ["uid", "firstName", "lastName", "rut", "email", "createdAt"]
+      "required": ["uid", "firstName", "lastName", "rut", "email", "kycStatus", "createdAt"]
+    },
+    "UniqueRut": {
+      "title": "Unique RUT",
+      "description": "Mapping from RUT to UID to ensure uniqueness.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Owner UID" }
+      },
+      "required": ["uid"]
+    },
+    "SupportMessage": {
+      "title": "Support Message",
+      "description": "Message in a support thread.",
+      "type": "object",
+      "properties": {
+        "sender": { "type": "string", "enum": ["user", "bot", "executive"], "description": "Who sent the message" },
+        "text": { "type": "string", "description": "Message content" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When it was sent" }
+      },
+      "required": ["sender", "text", "timestamp"]
     }
   },
   "firestore": {
     "/users/{userId}": {
       "schema": "UserProfile",
       "description": "User profile document indexed by Auth UID."
+    },
+    "/unique_ruts/{rut}": {
+      "schema": "UniqueRut",
+      "description": "Lock document for RUT uniqueness."
+    },
+    "/support_threads/{userId}/messages/{messageId}": {
+      "schema": "SupportMessage",
+      "description": "Messages for a user's support thread."
     }
   }
 }

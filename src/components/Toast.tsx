@@ -64,7 +64,7 @@ const STYLES = {
   },
 };
 
-function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
+function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void; key?: string }) {
   const style = STYLES[toast.type];
   const Icon = ICONS[toast.type];
   const duration = toast.duration || 4000;
